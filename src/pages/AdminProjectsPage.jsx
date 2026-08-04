@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { DEGREE_OPTIONS } from '../lib/constants.js'
+import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
 import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
 
 const defaultForm = {
@@ -12,6 +13,12 @@ const defaultForm = {
 }
 
 export function AdminProjectsPage() {
+  useDocumentMeta({
+    title: 'Admin — Projects',
+    path: '/admin/projects',
+    noindex: true,
+  })
+
   const [projects, setProjects] = useState([])
   const [form, setForm] = useState(defaultForm)
   const [error, setError] = useState('')

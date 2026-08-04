@@ -1,11 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
 import { DEGREE_OPTIONS } from '../lib/constants.js'
 import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
 
 const PAGE_SIZE = 6
 
 export function CatalogPage() {
+  useDocumentMeta({
+    title: 'Project Catalog',
+    description:
+      'Browse B.Tech and M.Tech CSE project options by degree, domain, and keyword — with code, documentation, and viva support included.',
+    path: '/catalog',
+  })
+
   const [degreeFilter, setDegreeFilter] = useState('all')
   const [domainFilter, setDomainFilter] = useState('all')
   const [domainOptions, setDomainOptions] = useState([])

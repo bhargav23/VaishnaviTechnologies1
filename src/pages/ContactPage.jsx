@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
 
 const initialForm = {
   name: '',
@@ -8,6 +9,12 @@ const initialForm = {
 }
 
 export function ContactPage() {
+  useDocumentMeta({
+    title: 'Contact Us',
+    description:
+      'Get in touch with Vaishnavi Technologies for questions about pricing, process, or general B.Tech/M.Tech project mentorship enquiries.',
+    path: '/contact',
+  })
   const [form, setForm] = useState(initialForm)
   const [sent, setSent] = useState(false)
 
