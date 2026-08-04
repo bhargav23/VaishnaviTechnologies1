@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
+import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
 import { DEGREE_OPTIONS } from '../lib/constants.js'
 import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
 
@@ -13,6 +14,13 @@ const initialForm = {
 }
 
 export function InquirePage() {
+  useDocumentMeta({
+    title: 'Request Mentorship',
+    description:
+      'Submit your B.Tech or M.Tech project requirement and get matched with the right mentorship track — ready-made, custom-built, or guided support.',
+    path: '/inquire',
+  })
+
   const { user, profile } = useAuth()
   const [searchParams] = useSearchParams()
   const [projects, setProjects] = useState([])

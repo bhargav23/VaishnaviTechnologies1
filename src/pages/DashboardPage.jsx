@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../hooks/useAuth.js'
+import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
 import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
 
 function statusClass(status) {
@@ -13,6 +14,7 @@ function statusClass(status) {
 }
 
 export function DashboardPage() {
+  useDocumentMeta({ title: 'Dashboard', path: '/dashboard', noindex: true })
   const { user } = useAuth()
   const [inquiries, setInquiries] = useState([])
   const [loading, setLoading] = useState(true)

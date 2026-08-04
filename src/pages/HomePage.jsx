@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
 
 const services = [
   {
@@ -64,6 +65,13 @@ const addOns = [
 ]
 
 export function HomePage() {
+  useDocumentMeta({
+    title: 'B.Tech & M.Tech CSE Project Mentorship',
+    description:
+      'Ready-made, custom-built, and guided B.Tech & M.Tech CSE academic projects with source code, documentation, PPT, and viva support. Fast delivery, transparent pricing.',
+    path: '/',
+  })
+
   return (
     <>
       <section className="hero hero-grid">

@@ -5,6 +5,7 @@ import { AdminInquiriesPage } from './pages/AdminInquiriesPage.jsx'
 import { AdminProjectsPage } from './pages/AdminProjectsPage.jsx'
 import { AuthPage } from './pages/AuthPage.jsx'
 import { CatalogPage } from './pages/CatalogPage.jsx'
+import { ContactPage } from './pages/ContactPage.jsx'
 import { DashboardPage } from './pages/DashboardPage.jsx'
 import { HomePage } from './pages/HomePage.jsx'
 import { InquirePage } from './pages/InquirePage.jsx'
@@ -19,6 +20,7 @@ function App() {
         <Route path="/catalog" element={<CatalogPage />} />
         <Route path="/project/:projectId" element={<ProjectPage />} />
         <Route path="/inquire" element={<InquirePage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/auth" element={<AuthPage />} />
         <Route
           path="/dashboard"

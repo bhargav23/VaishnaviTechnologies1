@@ -1,13 +1,47 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { DEGREE_OPTIONS } from '../lib/constants.js'
 import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
 
+const PAGE_SIZE = 6
+
 export function CatalogPage() {
   const [degreeFilter, setDegreeFilter] = useState('all')
+  const [domainFilter, setDomainFilter] = useState('all')
+  const [domainOptions, setDomainOptions] = useState([])
+  const [searchTerm, setSearchTerm] = useState('')
   const [projects, setProjects] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+
+  useEffect(() => {
+    let alive = true
+    const loadDomains = async () => {
+      if (!isSupabaseConfigured || !supabase) {
+        return
+      }
+      const { data, error: domainError } = await supabase
+        .from('projects')
+        .select('domain')
+        .eq('is_active', true)
+
+      if (!alive || domainError || !data) {
+        return
+      }
+
+      const uniqueDomains = Array.from(
+        new Set(data.map((row) => row.domain).filter(Boolean)),
+      ).sort((a, b) => a.localeCompare(b))
+
+      setDomainOptions(uniqueDomains)
+    }
+
+    loadDomains()
+    return () => {
+      alive = false
+    }
+  }, [])
 
   useEffect(() => {
     let alive = true
@@ -30,6 +64,10 @@ export function CatalogPage() {
         query = query.eq('degree_level', degreeFilter)
       }
 
+      if (domainFilter !== 'all') {
+        query = query.eq('domain', domainFilter)
+      }
+
       const { data, error: queryError } = await query
       if (!alive) {
         return
@@ -48,7 +86,28 @@ export function CatalogPage() {
     return () => {
       alive = false
     }
-  }, [degreeFilter])
+  }, [degreeFilter, domainFilter])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [degreeFilter, domainFilter, searchTerm])
+
+  const searchedProjects = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase()
+    if (!term) {
+      return projects
+    }
+    return projects.filter(
+      (project) =>
+        project.title?.toLowerCase().includes(term) ||
+        project.abstract?.toLowerCase().includes(term),
+    )
+  }, [projects, searchTerm])
+
+  const totalPages = Math.max(1, Math.ceil(searchedProjects.length / PAGE_SIZE))
+  const safePage = Math.min(currentPage, totalPages)
+  const pageStart = (safePage - 1) * PAGE_SIZE
+  const visibleProjects = searchedProjects.slice(pageStart, pageStart + PAGE_SIZE)
 
   return (
     <>
@@ -75,23 +134,55 @@ export function CatalogPage() {
             ))}
           </select>
         </label>
+        <label className="compact-field">
+          <span>Domain</span>
+          <select
+            value={domainFilter}
+            onChange={(event) => setDomainFilter(event.target.value)}
+          >
+            <option value="all">All</option>
+            {domainOptions.map((domain) => (
+              <option key={domain} value={domain}>
+                {domain}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="compact-field">
+          <span>Search</span>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Search by title or keyword..."
+          />
+        </label>
         <div className="results-chip">
-          {loading ? 'Loading...' : `${projects.length} project${projects.length === 1 ? '' : 's'} found`}
+          {loading
+            ? 'Loading...'
+            : `${searchedProjects.length} project${searchedProjects.length === 1 ? '' : 's'} found`}
         </div>
       </div>
 
       {error ? <p className="error-box">{error}</p> : null}
       {loading ? <p className="muted">Loading projects...</p> : null}
-      {!loading && !projects.length ? (
+      {!loading && !searchedProjects.length ? (
         <p className="muted">No active projects found for this filter.</p>
       ) : null}
 
       <section className="grid">
-        {projects.map((project) => (
+        {visibleProjects.map((project) => (
           <article className="card elevated-card catalog-card" key={project.id}>
             <div className="card-meta">
-              <span className="pill">{project.degree_level?.toUpperCase()}</span>
-              <span className="muted"> · {project.domain}</span>
+              {project.degree_level ? (
+                <span className="pill">{project.degree_level.toUpperCase()}</span>
+              ) : null}
+              {project.domain ? (
+                <span className="muted">
+                  {project.degree_level ? ' · ' : ''}
+                  {project.domain}
+                </span>
+              ) : null}
             </div>
             <h3>{project.title}</h3>
             <p className="muted">{project.abstract}</p>
@@ -120,6 +211,40 @@ export function CatalogPage() {
           </article>
         ))}
       </section>
+
+      {!loading && searchedProjects.length > PAGE_SIZE ? (
+        <nav className="pagination" aria-label="Catalog pagination">
+          <button
+            type="button"
+            className="pagination-button"
+            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+            disabled={safePage === 1}
+          >
+            Prev
+          </button>
+
+          {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+            <button
+              type="button"
+              key={page}
+              className={`pagination-button${page === safePage ? ' is-active' : ''}`}
+              onClick={() => setCurrentPage(page)}
+              aria-current={page === safePage ? 'page' : undefined}
+            >
+              {page}
+            </button>
+          ))}
+
+          <button
+            type="button"
+            className="pagination-button"
+            onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+            disabled={safePage === totalPages}
+          >
+            Next
+          </button>
+        </nav>
+      ) : null}
     </>
   )
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
+import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
 
 function useMode() {
   const { search } = useLocation()
@@ -9,6 +10,11 @@ function useMode() {
 
 export function AuthPage() {
   const mode = useMode()
+  useDocumentMeta({
+    title: mode === 'signup' ? 'Create Account' : 'Login',
+    path: '/auth',
+    noindex: true,
+  })
   const navigate = useNavigate()
   const { signIn, signUp } = useAuth()
   const [form, setForm] = useState({

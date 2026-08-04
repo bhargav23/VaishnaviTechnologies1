@@ -27,6 +27,9 @@ export function Layout() {
             <NavLink to="/inquire" className={navLinkClass}>
               Inquire
             </NavLink>
+            <NavLink to="/contact" className={navLinkClass}>
+              Contact
+            </NavLink>
             {user ? (
               <NavLink to="/dashboard" className={navLinkClass}>
                 Dashboard
@@ -68,8 +71,68 @@ export function Layout() {
 
       <footer className="site-footer">
         <div className="site-footer-inner">
-          Vaishnavi Technologies · B.Tech &amp; M.Tech CSE Project Development
-          Studio
+          <div className="footer-grid">
+            <div className="footer-brand">
+              <Link to="/" className="brand">
+                <span className="brand-mark">VT</span>
+                <span>Vaishnavi Technologies</span>
+              </Link>
+              <p className="muted">
+                B.Tech &amp; M.Tech CSE project mentorship — development,
+                documentation, and viva support.
+              </p>
+            </div>
+
+            <div className="footer-col">
+              <h4>Quick Links</h4>
+              <ul className="footer-links">
+                <li>
+                  <Link to="/catalog">Project Catalog</Link>
+                </li>
+                <li>
+                  <Link to="/inquire">Inquire Now</Link>
+                </li>
+                <li>
+                  <Link to="/contact">Contact Us</Link>
+                </li>
+                {user ? (
+                  <li>
+                    <Link to="/dashboard">Dashboard</Link>
+                  </li>
+                ) : (
+                  <li>
+                    <Link to="/auth">Login</Link>
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            <div className="footer-col">
+              <h4>Contact</h4>
+              <ul className="footer-links">
+                <li>
+                  <a href="mailto:hello@vaishnavitech.in">
+                    hello@vaishnavitech.in
+                  </a>
+                </li>
+                <li>
+                  <a href="tel:+910000000000">+91 00000 00000</a>
+                </li>
+                <li className="footer-address">
+                  Your Street, Area,
+                  <br />
+                  City, Andhra Pradesh, 000000
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="footer-bottom">
+            <span>
+              © {new Date().getFullYear()} Vaishnavi Technologies. All
+              rights reserved.
+            </span>
+          </div>
         </div>
       </footer>
     </div>

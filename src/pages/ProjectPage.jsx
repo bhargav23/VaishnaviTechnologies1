@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
 import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
+
+function truncate(text, maxLength) {
+  if (!text || text.length <= maxLength) {
+    return text
+  }
+  return `${text.slice(0, maxLength - 1).trimEnd()}…`
+}
 
 export function ProjectPage() {
   const { projectId } = useParams()
@@ -41,6 +49,13 @@ export function ProjectPage() {
     }
   }, [projectId])
 
+  useDocumentMeta({
+    title: project ? `${project.title} (${project.degree_level?.toUpperCase()} ${project.domain})` : 'Project Details',
+    description: project ? truncate(project.abstract, 155) : undefined,
+    path: `/project/${projectId}`,
+    noindex: !project,
+  })
+
   if (loading) {
     return <p className="muted">Loading project details...</p>
   }
@@ -57,8 +72,15 @@ export function ProjectPage() {
     <section className="project-layout">
       <article className="card project-hero-card">
         <div className="card-meta">
-          <span className="pill">{project.degree_level?.toUpperCase()}</span>
-          <span className="muted"> · {project.domain}</span>
+          {project.degree_level ? (
+            <span className="pill">{project.degree_level.toUpperCase()}</span>
+          ) : null}
+          {project.domain ? (
+            <span className="muted">
+              {project.degree_level ? ' · ' : ''}
+              {project.domain}
+            </span>
+          ) : null}
         </div>
         <h1>{project.title}</h1>
         <p className="muted">{project.abstract}</p>

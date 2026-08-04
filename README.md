@@ -20,6 +20,7 @@ React + Vite frontend deployed on Netlify, backed by Supabase for auth, data, an
 ## Production notes
 
 - `supabase/schema.sql` now creates profiles from `auth.users` automatically with a database trigger, so account creation is not dependent on the frontend.
+- `supabase/schema.sql` also seeds a starter catalog (B.Tech + M.Tech projects) with idempotent inserts.
 - If Supabase email confirmation is enabled, new students must verify their email before logging in.
 - Promote the owner account to admin in Supabase with:
   ```sql
