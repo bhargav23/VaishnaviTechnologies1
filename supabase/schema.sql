@@ -205,12 +205,6 @@ to authenticated
 using (id = auth.uid());
 
 drop policy if exists "students update own profile" on public.profiles;
-create policy "students update own profile"
-on public.profiles
-for update
-to authenticated
-using (id = auth.uid())
-with check (id = auth.uid());
 
 drop policy if exists "students insert own profile" on public.profiles;
 create policy "students insert own profile"

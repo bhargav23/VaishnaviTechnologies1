@@ -116,12 +116,12 @@ export function Layout() {
                   </a>
                 </li>
                 <li>
-                  <a href="tel:+910000000000">+91 00000 00000</a>
+                  <a href="tel:+919989572748">+91 99895 72748</a>
                 </li>
                 <li className="footer-address">
-                  Your Street, Area,
+                  Cheediga,
                   <br />
-                  City, Andhra Pradesh, 000000
+                  Kakinada, Andhra Pradesh - 533006
                 </li>
               </ul>
             </div>

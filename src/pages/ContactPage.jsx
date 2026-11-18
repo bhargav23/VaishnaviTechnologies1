@@ -59,15 +59,15 @@ export function ContactPage() {
           <div className="info-list-item">
             <strong>Phone</strong>
             <span>
-              <a href="tel:+910000000000">+91 00000 00000</a>
+              <a href="tel:+919989572748">+91 99895 72748</a>
             </span>
           </div>
           <div className="info-list-item">
             <strong>Address</strong>
             <span>
-              Your Street, Area,
+              Cheediga,
               <br />
-              City, Andhra Pradesh, 000000
+              Kakinada, Andhra Pradesh - 533006
             </span>
           </div>
           <div className="info-list-item">
