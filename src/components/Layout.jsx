@@ -1,6 +1,10 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
+import { trackContactClick } from '../lib/analytics.js'
+import { CONTACT, whatsappUrl } from '../lib/constants.js'
 import { isSupabaseConfigured } from '../lib/supabase.js'
+
+const CURRENT_YEAR = new Date().getFullYear()
 
 function navLinkClass({ isActive }) {
   return isActive ? 'nav-link nav-link-active' : 'nav-link'
@@ -91,8 +95,8 @@ export function Layout() {
                 <span>Vaishnavi Technologies</span>
               </Link>
               <p className="muted">
-                B.Tech &amp; M.Tech CSE project mentorship — development,
-                documentation, and viva support.
+                B.Tech, M.Tech &amp; PhD CSE project and research mentorship —
+                development, documentation, and viva preparation.
               </p>
             </div>
 
@@ -124,12 +128,30 @@ export function Layout() {
               <h4>Contact</h4>
               <ul className="footer-links">
                 <li>
-                  <a href="mailto:hello@vaishnavitech.in">
-                    hello@vaishnavitech.in
+                  <a
+                    href={`mailto:${CONTACT.email}`}
+                    onClick={() => trackContactClick('email')}
+                  >
+                    {CONTACT.email}
                   </a>
                 </li>
                 <li>
-                  <a href="tel:+919989572748">+91 99895 72748</a>
+                  <a
+                    href={CONTACT.phoneHref}
+                    onClick={() => trackContactClick('phone')}
+                  >
+                    {CONTACT.phoneDisplay}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={whatsappUrl()}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => trackContactClick('whatsapp')}
+                  >
+                    WhatsApp us
+                  </a>
                 </li>
                 <li className="footer-address">
                   Cheediga,
@@ -142,12 +164,35 @@ export function Layout() {
 
           <div className="footer-bottom">
             <span>
-              © {new Date().getFullYear()} Vaishnavi Technologies. All
-              rights reserved.
+              © {CURRENT_YEAR} Vaishnavi Technologies. All rights reserved.
             </span>
           </div>
         </div>
       </footer>
+
+      <a
+        className="whatsapp-fab"
+        href={whatsappUrl()}
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Chat with us on WhatsApp"
+        onClick={() => trackContactClick('whatsapp')}
+      >
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          width="22"
+          height="22"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5Z" />
+        </svg>
+        <span>WhatsApp</span>
+      </a>
     </div>
   )
 }

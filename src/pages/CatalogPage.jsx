@@ -96,10 +96,6 @@ export function CatalogPage() {
     }
   }, [degreeFilter, domainFilter])
 
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [degreeFilter, domainFilter, searchTerm])
-
   const searchedProjects = useMemo(() => {
     const term = searchTerm.trim().toLowerCase()
     if (!term) {
@@ -132,7 +128,10 @@ export function CatalogPage() {
           <span>Degree level</span>
           <select
             value={degreeFilter}
-            onChange={(event) => setDegreeFilter(event.target.value)}
+            onChange={(event) => {
+              setDegreeFilter(event.target.value)
+              setCurrentPage(1)
+            }}
           >
             <option value="all">All</option>
             {DEGREE_OPTIONS.map((degree) => (
@@ -146,7 +145,10 @@ export function CatalogPage() {
           <span>Domain</span>
           <select
             value={domainFilter}
-            onChange={(event) => setDomainFilter(event.target.value)}
+            onChange={(event) => {
+              setDomainFilter(event.target.value)
+              setCurrentPage(1)
+            }}
           >
             <option value="all">All</option>
             {domainOptions.map((domain) => (
@@ -161,7 +163,10 @@ export function CatalogPage() {
           <input
             type="text"
             value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
+            onChange={(event) => {
+              setSearchTerm(event.target.value)
+              setCurrentPage(1)
+            }}
             placeholder="Search by title or keyword..."
           />
         </label>

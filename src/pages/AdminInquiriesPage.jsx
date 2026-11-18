@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { DEGREE_OPTIONS, INQUIRY_STATUS } from '../lib/constants.js'
+import {
+  INQUIRY_STATUS,
+  STUDENT_DEGREE_OPTIONS,
+  degreeLabel,
+} from '../lib/constants.js'
 import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
 import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
 
@@ -21,28 +25,22 @@ export function AdminInquiriesPage() {
   })
   const [inquiries, setInquiries] = useState([])
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(isSupabaseConfigured)
   const [success, setSuccess] = useState('')
   const [updatingId, setUpdatingId] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [degreeFilter, setDegreeFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
 
-  const loadInquiries = async () => {
-    if (!isSupabaseConfigured || !supabase) {
-      setInquiries([])
-      setLoading(false)
-      return
-    }
-
-    setLoading(true)
-    const { data, error: queryError } = await supabase
+  const fetchInquiries = () =>
+    supabase
       .from('inquiries')
       .select(
         'id,name,email,degree,message,status,created_at,projects(title,domain)',
       )
       .order('created_at', { ascending: false })
 
+  const applyInquiries = ({ data, error: queryError }) => {
     if (queryError) {
       setError(queryError.message)
       setInquiries([])
@@ -52,8 +50,28 @@ export function AdminInquiriesPage() {
     setLoading(false)
   }
 
+  const loadInquiries = async () => {
+    if (!isSupabaseConfigured || !supabase) {
+      return
+    }
+    setLoading(true)
+    applyInquiries(await fetchInquiries())
+  }
+
   useEffect(() => {
-    loadInquiries()
+    if (!isSupabaseConfigured || !supabase) {
+      return undefined
+    }
+    let alive = true
+    fetchInquiries().then((result) => {
+      if (alive) {
+        applyInquiries(result)
+      }
+    })
+    return () => {
+      alive = false
+    }
+    // Load once on mount; later refreshes go through loadInquiries().
   }, [])
 
   const pendingCount = inquiries.filter((item) => item.status === 'pending').length
@@ -162,9 +180,9 @@ export function AdminInquiriesPage() {
             onChange={(event) => setDegreeFilter(event.target.value)}
           >
             <option value="all">All</option>
-            {DEGREE_OPTIONS.map((degree) => (
+            {STUDENT_DEGREE_OPTIONS.map((degree) => (
               <option key={degree} value={degree}>
-                {degree.toUpperCase()}
+                {degreeLabel(degree)}
               </option>
             ))}
           </select>
@@ -209,10 +227,10 @@ export function AdminInquiriesPage() {
                 <td>
                   <strong>{inquiry.name}</strong>
                   <div className="muted">{inquiry.email}</div>
-                  <div className="muted">{inquiry.degree.toUpperCase()}</div>
+                  <div className="muted">{degreeLabel(inquiry.degree)}</div>
                 </td>
                 <td>
-                  <strong>{inquiry.projects?.title ?? 'General inquiry'}</strong>
+                  <strong>{inquiry.projects?.title ?? 'Own topic / general'}</strong>
                   <div className="muted">{inquiry.projects?.domain ?? 'N/A'}</div>
                 </td>
                 <td>{inquiry.message}</td>

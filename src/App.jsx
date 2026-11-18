@@ -47,8 +47,8 @@ function App() {
           }
         />
         <Route path="/admin" element={<Navigate to="/admin/projects" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
-      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

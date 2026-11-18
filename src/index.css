@@ -375,11 +375,13 @@ a {
 
 .form-grid {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
 }
 
 .form-grid label {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.35rem;
   font-size: 0.92rem;
   font-weight: 600;
@@ -401,6 +403,8 @@ a {
 .form-grid input,
 .form-grid select,
 .form-grid textarea {
+  width: 100%;
+  min-width: 0;
   border: 1px solid #cbd5e1;
   border-radius: 12px;
   padding: 0.8rem 0.85rem;
@@ -574,6 +578,18 @@ thead {
   line-height: 1.5;
 }
 
+/* Readable contrast on the dark hero background. */
+.hero-side-card .stat-card span {
+  color: #cbd5e1;
+}
+
+/* The light-blue eyebrow is meant for the dark hero; on light panels it
+   was too faint to read. */
+.info-panel .eyebrow,
+.page-header .eyebrow {
+  color: #1d4ed8;
+}
+
 .light-stat {
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(226, 232, 240, 0.95);
@@ -637,6 +653,38 @@ thead {
   width: 100%;
   height: 100%;
   border: 0;
+}
+
+.whatsapp-fab {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.1rem;
+  border-radius: 999px;
+  background: #15803d;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 12px 28px rgba(21, 128, 61, 0.35);
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.whatsapp-fab:hover,
+.whatsapp-fab:focus-visible {
+  background: #166534;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.whatsapp-fab:focus-visible {
+  outline: 3px solid #86efac;
+  outline-offset: 3px;
 }
 
 .site-footer {
@@ -714,10 +762,12 @@ thead {
 }
 
 @media (max-width: 900px) {
+  /* minmax(0, 1fr) stops long content (e.g. project names in a select)
+     from stretching the column wider than the screen. */
   .hero-grid,
   .split-layout,
   .project-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .top-nav-inner,
@@ -765,4 +815,18 @@ thead {
   .map-frame {
     height: 280px;
   }
+}
+
+@media (max-width: 720px) {
+  /* Keep the footer text clear of the floating WhatsApp button. */
+  .site-footer {
+    padding-bottom: 4.5rem;
+  }
+}
+
+.text-link {
+  display: inline-block;
+  margin-top: 0.4rem;
+  color: #1d4ed8;
+  font-weight: 700;
 }
