@@ -1,4 +1,4 @@
-# TechHub Mentorship Platform (Phase 1)
+# Vaishnavi Technologies Project Studio
 
 React + Vite frontend deployed on Netlify, backed by Supabase for auth, data, and row-level security.
 
@@ -44,3 +44,4 @@ React + Vite frontend deployed on Netlify, backed by Supabase for auth, data, an
 
 - `netlify.toml` is included with SPA redirects.
 - Set Netlify environment variables from `.env.example`.
+- Dynamic project previews and the sitemap use Netlify Functions and the same Supabase environment variables.

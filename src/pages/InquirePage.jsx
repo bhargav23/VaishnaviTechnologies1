@@ -96,28 +96,32 @@ export function InquirePage() {
     setSuccess(false)
     setSubmitting(true)
 
-    const { error: insertError } = await supabase.from('inquiries').insert({
-      student_id: user?.id ?? null,
-      project_id: form.projectId,
-      name: form.name.trim(),
-      email: form.email.trim(),
-      degree: form.degree,
-      message: form.message.trim(),
-      status: 'pending',
-    })
+    try {
+      const { error: insertError } = await supabase.from('inquiries').insert({
+        student_id: user?.id ?? null,
+        project_id: form.projectId,
+        name: form.name.trim(),
+        email: form.email.trim(),
+        degree: form.degree,
+        message: form.message.trim(),
+        status: 'pending',
+      })
 
-    setSubmitting(false)
+      if (insertError) {
+        setError(insertError.message)
+        return
+      }
 
-    if (insertError) {
-      setError(insertError.message)
-      return
+      setSuccess(true)
+      setForm((current) => ({
+        ...current,
+        message: '',
+      }))
+    } catch (submitError) {
+      setError(submitError.message)
+    } finally {
+      setSubmitting(false)
     }
-
-    setSuccess(true)
-    setForm((current) => ({
-      ...current,
-      message: '',
-    }))
   }
 
   return (
@@ -165,6 +169,9 @@ export function InquirePage() {
               Name
               <input
                 required
+                minLength={2}
+                maxLength={120}
+                autoComplete="name"
                 value={form.name}
                 onChange={(event) =>
                   setForm((current) => ({ ...current, name: event.target.value }))
@@ -176,6 +183,8 @@ export function InquirePage() {
               <input
                 type="email"
                 required
+                maxLength={254}
+                autoComplete="email"
                 value={form.email}
                 onChange={(event) =>
                   setForm((current) => ({ ...current, email: event.target.value }))
@@ -220,6 +229,8 @@ export function InquirePage() {
               Message / Requirement
               <textarea
                 required
+                minLength={1}
+                maxLength={5000}
                 placeholder="Share your expected timeline, domain preferences, and requirement details."
                 value={form.message}
                 onChange={(event) =>

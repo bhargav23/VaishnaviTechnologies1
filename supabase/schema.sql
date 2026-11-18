@@ -33,6 +33,40 @@ create table if not exists public.inquiries (
   created_at timestamptz not null default timezone('utc', now())
 );
 
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'inquiries_name_length'
+      and conrelid = 'public.inquiries'::regclass
+  ) then
+    alter table public.inquiries
+      add constraint inquiries_name_length
+      check (char_length(btrim(name)) between 1 and 120);
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'inquiries_email_length'
+      and conrelid = 'public.inquiries'::regclass
+  ) then
+    alter table public.inquiries
+      add constraint inquiries_email_length
+      check (char_length(btrim(email)) between 3 and 254);
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'inquiries_message_length'
+      and conrelid = 'public.inquiries'::regclass
+  ) then
+    alter table public.inquiries
+      add constraint inquiries_message_length
+      check (char_length(btrim(message)) between 1 and 5000);
+  end if;
+end;
+$$;
+
 insert into public.projects (
   title,
   degree_level,
@@ -110,6 +144,40 @@ where not exists (
 create index if not exists idx_projects_degree_active on public.projects (degree_level, is_active);
 create index if not exists idx_inquiries_student on public.inquiries (student_id, created_at desc);
 create index if not exists idx_inquiries_status on public.inquiries (status, created_at desc);
+create index if not exists idx_inquiries_email_created_at on public.inquiries (lower(btrim(email)), created_at desc);
+
+create or replace function public.limit_inquiry_submissions()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  recent_count integer;
+  normalized_email text := lower(btrim(new.email));
+begin
+  new.email := lower(btrim(new.email));
+  perform pg_advisory_xact_lock(hashtextextended(normalized_email, 0));
+
+  select count(*)
+  into recent_count
+  from public.inquiries i
+  where lower(btrim(i.email)) = normalized_email
+    and i.created_at > now() - interval '1 hour';
+
+  if recent_count >= 3 then
+    raise exception 'Inquiry limit reached. Please try again later.'
+      using errcode = 'P0001';
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists limit_inquiry_submissions on public.inquiries;
+create trigger limit_inquiry_submissions
+before insert on public.inquiries
+for each row execute procedure public.limit_inquiry_submissions();
 
 create or replace function public.handle_new_user()
 returns trigger

@@ -1,12 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AuthContext } from './AuthContextObject.js'
 import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
-
-function delay(ms) {
-  return new Promise((resolve) => {
-    window.setTimeout(resolve, ms)
-  })
-}
 
 async function loadProfile(userId) {
   if (!supabase) {
@@ -28,79 +22,90 @@ async function loadProfile(userId) {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(isSupabaseConfigured)
+  const [profileError, setProfileError] = useState('')
+  const profileUserId = useRef(null)
+  const profileRequestId = useRef(0)
 
-  const refreshProfile = async (currentUser, attempts = 4) => {
+  const refreshProfile = useCallback(async (currentUser) => {
     if (!currentUser) {
+      profileUserId.current = null
       setProfile(null)
-      return
+      setProfileError('')
+      return null
     }
 
-    for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const requestId = ++profileRequestId.current
+    profileUserId.current = currentUser.id
+    setProfileError('')
+    setLoading(true)
+
+    try {
       const profileData = await loadProfile(currentUser.id)
-      if (profileData) {
-        setProfile(profileData)
-        return profileData
+      if (requestId !== profileRequestId.current) {
+        return null
       }
-
-      if (attempt < attempts - 1) {
-        await delay(200)
+      if (!profileData) {
+        throw new Error('No profile is associated with this account.')
+      }
+      setProfile(profileData)
+      return profileData
+    } catch (error) {
+      if (requestId === profileRequestId.current) {
+        setProfile(null)
+        setProfileError(error.message)
+      }
+      return null
+    } finally {
+      if (requestId === profileRequestId.current) {
+        setLoading(false)
       }
     }
-
-    setProfile(null)
-    return null
-  }
+  }, [])
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
-      setLoading(false)
       return
     }
 
     let alive = true
-    const bootstrap = async () => {
-      try {
-        const { data, error } = await supabase.auth.getUser()
-        if (error) {
-          throw error
-        }
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        const currentUser = session?.user ?? null
+        setUser(currentUser)
 
-        const currentUser = data?.user ?? null
-        if (!alive) {
+        if (!currentUser) {
+          profileRequestId.current += 1
+          profileUserId.current = null
+          setProfile(null)
+          setProfileError('')
+          setLoading(false)
           return
         }
 
-        setUser(currentUser)
-        if (currentUser) {
-          await refreshProfile(currentUser)
+        if (profileUserId.current === currentUser.id) {
+          return
         }
-      } finally {
-        if (alive) {
-          setLoading(false)
-        }
-      }
-    }
 
-    bootstrap()
+        profileUserId.current = currentUser.id
+        setProfile(null)
+        setProfileError('')
+        setLoading(true)
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        const currentUser = session?.user ?? null
-        setUser(currentUser)
-        if (currentUser) {
-          await refreshProfile(currentUser)
-        } else {
-          setProfile(null)
-        }
+        window.setTimeout(() => {
+          if (alive && profileUserId.current === currentUser.id) {
+            void refreshProfile(currentUser)
+          }
+        }, 0)
       },
     )
 
     return () => {
       alive = false
+      profileRequestId.current += 1
       authListener.subscription.unsubscribe()
     }
-  }, [])
+  }, [refreshProfile])
 
   const signUp = async ({ fullName, degree, email, password }) => {
     if (!supabase) {
@@ -122,10 +127,6 @@ export function AuthProvider({ children }) {
       throw error
     }
 
-    if (data.user && data.session) {
-      await refreshProfile(data.user)
-    }
-
     return {
       requiresEmailConfirmation: !data.session,
       user: data.user,
@@ -137,16 +138,12 @@ export function AuthProvider({ children }) {
       throw new Error('Supabase configuration is missing.')
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
     if (error) {
       throw error
-    }
-
-    if (data.user) {
-      await refreshProfile(data.user)
     }
   }
 
@@ -168,12 +165,14 @@ export function AuthProvider({ children }) {
       loading,
       user,
       profile,
+      profileError,
       isAdmin: profile?.role === 'admin',
+      refreshProfile,
       signUp,
       signIn,
       signOut,
     }),
-    [loading, user, profile],
+    [loading, user, profile, profileError, refreshProfile],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

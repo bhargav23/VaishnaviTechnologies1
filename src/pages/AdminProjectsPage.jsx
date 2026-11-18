@@ -26,6 +26,7 @@ export function AdminProjectsPage() {
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState('')
   const [deletingId, setDeletingId] = useState('')
+  const [statusUpdatingId, setStatusUpdatingId] = useState('')
   const [editingId, setEditingId] = useState('')
   const [degreeFilter, setDegreeFilter] = useState('all')
   const [domainFilter, setDomainFilter] = useState('all')
@@ -134,11 +135,45 @@ export function AdminProjectsPage() {
     setDeletingId('')
 
     if (deleteError) {
+      if (deleteError.code === '23503') {
+        setError(
+          'This project has inquiries attached and cannot be deleted. Deactivate it to hide it from the public catalog.',
+        )
+        return
+      }
       setError(deleteError.message)
       return
     }
 
     setSuccess('Project deleted successfully.')
+    await loadProjects()
+  }
+
+  const toggleProjectStatus = async (project) => {
+    if (!supabase) {
+      setError('Supabase configuration is missing.')
+      return
+    }
+
+    setError('')
+    setSuccess('')
+    setStatusUpdatingId(project.id)
+    const { error: updateError } = await supabase
+      .from('projects')
+      .update({ is_active: !project.is_active })
+      .eq('id', project.id)
+    setStatusUpdatingId('')
+
+    if (updateError) {
+      setError(updateError.message)
+      return
+    }
+
+    setSuccess(
+      project.is_active
+        ? 'Project deactivated and hidden from the public catalog.'
+        : 'Project reactivated and visible in the public catalog.',
+    )
     await loadProjects()
   }
 
@@ -397,6 +432,18 @@ export function AdminProjectsPage() {
                 onClick={() => startEdit(project)}
               >
                 Edit
+              </button>
+              <button
+                type="button"
+                className="button-secondary"
+                disabled={statusUpdatingId === project.id}
+                onClick={() => toggleProjectStatus(project)}
+              >
+                {statusUpdatingId === project.id
+                  ? 'Updating...'
+                  : project.is_active
+                    ? 'Deactivate'
+                    : 'Reactivate'}
               </button>
               <button
                 type="button"

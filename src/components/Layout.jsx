@@ -7,7 +7,7 @@ function navLinkClass({ isActive }) {
 }
 
 export function Layout() {
-  const { user, isAdmin, signOut } = useAuth()
+  const { user, isAdmin, profileError, refreshProfile, signOut } = useAuth()
 
   return (
     <div className="app-shell">
@@ -64,6 +64,19 @@ export function Layout() {
             {' '}
             <code>VITE_SUPABASE_ANON_KEY</code>
             .
+          </div>
+        ) : null}
+        {profileError ? (
+          <div className="error-box" role="alert">
+            Could not load your account profile: {profileError}
+            {' '}
+            <button
+              type="button"
+              className="button-secondary"
+              onClick={() => refreshProfile(user)}
+            >
+              Retry
+            </button>
           </div>
         ) : null}
         <Outlet />

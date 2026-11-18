@@ -599,6 +599,46 @@ thead {
   border: 1px solid rgba(226, 232, 240, 0.95);
 }
 
+.map-section {
+  margin-top: 1.5rem;
+  padding: 1.2rem;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 20px 46px rgba(15, 23, 42, 0.06);
+}
+
+.map-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.map-heading .eyebrow {
+  margin: 0 0 0.25rem;
+  color: #2563eb;
+}
+
+.map-heading h2 {
+  margin: 0 0 0.25rem;
+}
+
+.map-frame {
+  height: 360px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #e2e8f0;
+}
+
+.map-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
 .site-footer {
   border-top: 1px solid rgba(226, 232, 240, 0.9);
   background: rgba(255, 255, 255, 0.82);
@@ -715,5 +755,14 @@ thead {
   .hero h1,
   .page-header h1 {
     font-size: clamp(1.8rem, 7vw, 2.4rem);
+  }
+
+  .map-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .map-frame {
+    height: 280px;
   }
 }
