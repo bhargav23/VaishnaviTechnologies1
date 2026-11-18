@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
+import { isUuid } from '../lib/constants.js'
 import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
 
 function truncate(text, maxLength) {
@@ -10,20 +11,41 @@ function truncate(text, maxLength) {
   return `${text.slice(0, maxLength - 1).trimEnd()}…`
 }
 
+function NotFoundMessage() {
+  return (
+    <section className="page-header">
+      <h1>Project not found</h1>
+      <p className="page-lead">
+        This project may have been removed or the link is incorrect.
+      </p>
+      <div className="actions-row">
+        <Link className="button-primary" to="/catalog">
+          Browse Project Catalog
+        </Link>
+        <Link className="button-secondary" to="/inquire">
+          Request Mentorship
+        </Link>
+      </div>
+    </section>
+  )
+}
+
 export function ProjectPage() {
   const { projectId } = useParams()
+  // A malformed ID can never match a project; skip the query (Supabase would
+  // reject it with a raw "invalid input syntax for type uuid" error).
+  const validId = isUuid(projectId)
   const [project, setProject] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(isSupabaseConfigured)
   const [error, setError] = useState('')
 
   useEffect(() => {
+    if (!validId || !isSupabaseConfigured || !supabase) {
+      return undefined
+    }
+
     let alive = true
     const loadProject = async () => {
-      if (!isSupabaseConfigured || !supabase) {
-        setLoading(false)
-        return
-      }
-
       const { data, error: queryError } = await supabase
         .from('projects')
         .select('*')
@@ -36,7 +58,7 @@ export function ProjectPage() {
       }
 
       if (queryError) {
-        setError(queryError.message)
+        setError('We could not load this project right now. Please try again shortly.')
       } else {
         setProject(data)
       }
@@ -47,7 +69,7 @@ export function ProjectPage() {
     return () => {
       alive = false
     }
-  }, [projectId])
+  }, [projectId, validId])
 
   useDocumentMeta({
     title: project ? `${project.title} (${project.degree_level?.toUpperCase()} ${project.domain})` : 'Project Details',
@@ -55,6 +77,10 @@ export function ProjectPage() {
     path: `/project/${projectId}`,
     noindex: !project,
   })
+
+  if (!validId) {
+    return <NotFoundMessage />
+  }
 
   if (loading) {
     return <p className="muted">Loading project details...</p>
@@ -65,7 +91,7 @@ export function ProjectPage() {
   }
 
   if (!project) {
-    return <p className="muted">Project not found.</p>
+    return <NotFoundMessage />
   }
 
   return (
