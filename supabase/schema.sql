@@ -4,7 +4,7 @@ create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   email text not null unique,
   full_name text not null default '',
-  degree text not null default 'btech' check (degree in ('btech', 'mtech')),
+  degree text not null default 'btech' check (degree in ('btech', 'mtech', 'phd')),
   role text not null default 'student' check (role in ('student', 'admin')),
   created_at timestamptz not null default timezone('utc', now())
 );
@@ -24,14 +24,47 @@ create table if not exists public.projects (
 create table if not exists public.inquiries (
   id uuid primary key default gen_random_uuid(),
   student_id uuid references public.profiles(id) on delete set null,
-  project_id uuid not null references public.projects(id) on delete restrict,
+  -- NULL means the student described their own topic instead of picking a
+  -- catalog project.
+  project_id uuid references public.projects(id) on delete restrict,
   name text not null,
   email text not null,
-  degree text not null check (degree in ('btech', 'mtech')),
+  degree text not null check (degree in ('btech', 'mtech', 'phd')),
   message text not null,
   status text not null default 'pending' check (status in ('pending', 'active', 'completed')),
   created_at timestamptz not null default timezone('utc', now())
 );
+
+-- Upgrade for databases created before PhD and "own topic" inquiries were
+-- supported. Same SQL as supabase/migrations/20261119_phd_and_own_topic_inquiries.sql.
+-- Safe to re-run.
+alter table public.inquiries alter column project_id drop not null;
+
+do $$
+declare
+  c record;
+begin
+  -- Replace whatever degree check constraints exist (their names depend on
+  -- how the tables were first created) with ones that allow 'phd'.
+  for c in
+    select conrelid::regclass as tbl, conname
+    from pg_constraint
+    where contype = 'c'
+      and conrelid in ('public.inquiries'::regclass, 'public.profiles'::regclass)
+      and pg_get_constraintdef(oid) ~ '\mdegree\M'
+  loop
+    execute format('alter table %s drop constraint %I', c.tbl, c.conname);
+  end loop;
+end;
+$$;
+
+alter table public.inquiries
+  add constraint inquiries_degree_check
+  check (degree in ('btech', 'mtech', 'phd'));
+
+alter table public.profiles
+  add constraint profiles_degree_check
+  check (degree in ('btech', 'mtech', 'phd'));
 
 do $$
 begin
@@ -192,7 +225,7 @@ begin
     new.email,
     coalesce(new.raw_user_meta_data->>'full_name', ''),
     case
-      when new.raw_user_meta_data->>'degree' in ('btech', 'mtech')
+      when new.raw_user_meta_data->>'degree' in ('btech', 'mtech', 'phd')
         then new.raw_user_meta_data->>'degree'
       else 'btech'
     end,
@@ -236,7 +269,7 @@ select
   u.email,
   coalesce(u.raw_user_meta_data->>'full_name', ''),
   case
-    when u.raw_user_meta_data->>'degree' in ('btech', 'mtech')
+    when u.raw_user_meta_data->>'degree' in ('btech', 'mtech', 'phd')
       then u.raw_user_meta_data->>'degree'
     else 'btech'
   end,

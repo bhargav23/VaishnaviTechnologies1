@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
+import { trackContactClick } from '../lib/analytics.js'
+import { CONTACT, whatsappUrl } from '../lib/constants.js'
 
 const initialForm = {
   name: '',
@@ -12,7 +14,7 @@ export function ContactPage() {
   useDocumentMeta({
     title: 'Contact Us',
     description:
-      'Get in touch with Vaishnavi Technologies for questions about pricing, process, or general B.Tech/M.Tech project mentorship enquiries.',
+      'Get in touch with Vaishnavi Technologies for questions about pricing, process, or general B.Tech, M.Tech and PhD project mentorship enquiries.',
     path: '/contact',
   })
   const [form, setForm] = useState(initialForm)
@@ -29,10 +31,11 @@ export function ContactPage() {
       form.message.trim(),
     ]
 
-    const mailtoUrl = `mailto:hello@vaishnavitech.in?subject=${encodeURIComponent(
+    const mailtoUrl = `mailto:${CONTACT.email}?subject=${encodeURIComponent(
       subject,
     )}&body=${encodeURIComponent(bodyLines.join('\n'))}`
 
+    trackContactClick('email_form')
     window.location.href = mailtoUrl
     setSent(true)
   }
@@ -52,15 +55,36 @@ export function ContactPage() {
             <div className="info-list-item">
               <strong>Email</strong>
               <span>
-                <a href="mailto:hello@vaishnavitech.in">
-                  hello@vaishnavitech.in
+                <a
+                  href={`mailto:${CONTACT.email}`}
+                  onClick={() => trackContactClick('email')}
+                >
+                  {CONTACT.email}
                 </a>
               </span>
             </div>
             <div className="info-list-item">
               <strong>Phone</strong>
               <span>
-                <a href="tel:+919989572748">+91 99895 72748</a>
+                <a
+                  href={CONTACT.phoneHref}
+                  onClick={() => trackContactClick('phone')}
+                >
+                  {CONTACT.phoneDisplay}
+                </a>
+              </span>
+            </div>
+            <div className="info-list-item">
+              <strong>WhatsApp</strong>
+              <span>
+                <a
+                  href={whatsappUrl()}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => trackContactClick('whatsapp')}
+                >
+                  Chat with us on WhatsApp
+                </a>
               </span>
             </div>
             <div className="info-list-item">
@@ -82,7 +106,7 @@ export function ContactPage() {
           {sent ? (
             <div className="success-box">
               Your email app should have opened with your message pre-filled.
-              If it didn&apos;t, email us directly at hello@vaishnavitech.in.
+              If it didn&apos;t, email us directly at {CONTACT.email}.
             </div>
           ) : null}
 

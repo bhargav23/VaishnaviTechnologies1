@@ -3,16 +3,16 @@ import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
 
 const services = [
   {
-    label: 'Ready-made projects',
-    title: 'Fast delivery with light customization',
+    label: 'Catalog projects',
+    title: 'Start from a tested project',
     description:
-      'Pre-built academic projects with source code, report, PPT, and quicker turnaround for mini and major submissions.',
+      'Pick a project from our catalog and customise it to your requirement, with source code, report, PPT, and viva preparation for mini and major projects.',
   },
   {
     label: 'Custom-built projects',
-    title: 'Built to the student requirement',
+    title: 'Built around your requirement',
     description:
-      'Custom domain selection, unique feature combinations, and defensible implementations for final-year evaluation.',
+      'Custom domain selection, unique feature combinations, and an implementation you can explain and defend in your final-year evaluation.',
   },
   {
     label: 'Guidance-only mentorship',
@@ -21,17 +21,17 @@ const services = [
       'Idea validation, documentation support, review checkpoints, and mentoring while the student writes the code.',
   },
   {
-    label: 'M.Tech publication support',
-    title: 'Research, paper writing, and journal help',
+    label: 'M.Tech & PhD research support',
+    title: 'Research guidance and publication mentoring',
     description:
-      'Thesis-oriented project execution with paper drafting, plagiarism awareness, and publication assistance.',
+      'Problem selection, literature review, experiment design, and mentoring on structuring papers, choosing journals, and preparing your thesis.',
   },
 ]
 
 const highlights = [
-  ['48hr', 'Fast turnaround for ready-made project customization'],
+  ['48hr', 'Fast turnaround when customising a catalog project'],
   ['3-4', 'Unique project variations recommended for every batch'],
-  ['Code + Docs', 'Source code, report, PPT, and viva support bundled'],
+  ['Code + Docs', 'Source code, report, PPT, and viva preparation together'],
 ]
 
 const projectTiers = [
@@ -50,25 +50,26 @@ const projectTiers = [
   {
     tier: 'Premium',
     price: '₹10,000 - ₹30,000+',
-    scope: 'Research-oriented systems, paper writing, plagiarism report, and viva prep',
+    scope:
+      'Research-oriented systems, paper mentoring, similarity check, and viva prep',
     bestFor: 'M.Tech thesis projects',
   },
 ]
 
 const addOns = [
-  ['Plagiarism report (Turnitin-style)', '₹300 - ₹600'],
+  ['Similarity check report', '₹300 - ₹600'],
   ['Video demo / code walkthrough for viva', '₹500 - ₹1,000'],
   ['1-on-1 viva prep / mock defense session', '₹500 - ₹1,500'],
-  ['Research paper writing (per paper)', '₹3,000 - ₹8,000'],
-  ['Journal publication assistance', '₹5,000 - ₹15,000'],
+  ['Research paper mentoring (per paper)', '₹3,000 - ₹8,000'],
+  ['Journal selection & submission guidance', '₹5,000 - ₹15,000'],
   ['Rush delivery (under 5 days)', '+20% of base price'],
 ]
 
 export function HomePage() {
   useDocumentMeta({
-    title: 'B.Tech & M.Tech CSE Project Mentorship',
+    title: 'B.Tech, M.Tech & PhD CSE Project Mentorship',
     description:
-      'Ready-made, custom-built, and guided B.Tech & M.Tech CSE academic projects with source code, documentation, PPT, and viva support. Fast delivery, transparent pricing.',
+      'CSE project and research mentorship in Kakinada for B.Tech, M.Tech and PhD students: catalog, custom-built and guided projects with documentation, PPT and viva preparation. Transparent pricing.',
     path: '/',
   })
 
@@ -77,13 +78,13 @@ export function HomePage() {
       <section className="hero hero-grid">
         <div>
           <span className="hero-badge">
-            B.Tech &amp; M.Tech CSE Project Development Studio
+            B.Tech, M.Tech &amp; PhD CSE Project Mentorship
           </span>
           <h1>Vaishnavi Technologies</h1>
           <p>
-            Ready-made, custom-built, and guided academic projects with code,
-            documentation, PPT, and viva support for engineering students and
-            project coordinators.
+            Catalog, custom-built, and guided academic projects with code,
+            documentation, PPT, and viva preparation for engineering students,
+            plus research guidance for M.Tech and PhD scholars.
           </p>
           <div className="actions-row">
             <Link className="button-primary" to="/catalog">
@@ -123,16 +124,27 @@ export function HomePage() {
         <article className="card elevated-card">
           <h3>B.Tech CSE / IT students</h3>
           <p className="muted">
-            Mini and major project delivery for 3rd and 4th year students who
-            need working, documented, defendable submissions.
+            Mini and major project mentoring for 3rd and 4th year students, with
+            working code, documentation, and viva preparation.
           </p>
         </article>
         <article className="card elevated-card">
           <h3>M.Tech CSE students</h3>
           <p className="muted">
-            Thesis-level project support with research paper drafting and journal
-            publication guidance.
+            Thesis-level project guidance, research paper mentoring, and journal
+            selection support.
           </p>
+        </article>
+        <article className="card elevated-card">
+          <h3>PhD scholars</h3>
+          <p className="muted">
+            Research problem selection, literature review, experiment design,
+            publication mentoring, and thesis formatting. Pricing depends on
+            scope; contact us for a quote.
+          </p>
+          <Link className="text-link" to="/inquire?degree=phd">
+            Request PhD guidance
+          </Link>
         </article>
         <article className="card elevated-card">
           <h3>Colleges and coordinators</h3>

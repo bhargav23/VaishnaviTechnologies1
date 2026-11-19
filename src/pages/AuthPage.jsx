@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
 import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
+import { STUDENT_DEGREE_OPTIONS, degreeLabel } from '../lib/constants.js'
 
 function useMode() {
   const { search } = useLocation()
@@ -99,8 +100,11 @@ export function AuthPage() {
                     setForm((current) => ({ ...current, degree: event.target.value }))
                   }
                 >
-                  <option value="btech">B.Tech</option>
-                  <option value="mtech">M.Tech</option>
+                  {STUDENT_DEGREE_OPTIONS.map((degree) => (
+                    <option key={degree} value={degree}>
+                      {degreeLabel(degree)}
+                    </option>
+                  ))}
                 </select>
               </label>
             </>

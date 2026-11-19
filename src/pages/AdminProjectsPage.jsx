@@ -22,7 +22,7 @@ export function AdminProjectsPage() {
   const [projects, setProjects] = useState([])
   const [form, setForm] = useState(defaultForm)
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(isSupabaseConfigured)
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState('')
   const [deletingId, setDeletingId] = useState('')
@@ -33,18 +33,10 @@ export function AdminProjectsPage() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
 
-  const loadProjects = async () => {
-    if (!isSupabaseConfigured || !supabase) {
-      setProjects([])
-      setLoading(false)
-      return
-    }
+  const fetchProjects = () =>
+    supabase.from('projects').select('*').order('created_at', { ascending: false })
 
-    setLoading(true)
-    const { data, error: queryError } = await supabase
-      .from('projects')
-      .select('*')
-      .order('created_at', { ascending: false })
+  const applyProjects = ({ data, error: queryError }) => {
     if (queryError) {
       setError(queryError.message)
       setProjects([])
@@ -54,8 +46,28 @@ export function AdminProjectsPage() {
     setLoading(false)
   }
 
+  const loadProjects = async () => {
+    if (!isSupabaseConfigured || !supabase) {
+      return
+    }
+    setLoading(true)
+    applyProjects(await fetchProjects())
+  }
+
   useEffect(() => {
-    loadProjects()
+    if (!isSupabaseConfigured || !supabase) {
+      return undefined
+    }
+    // Load once on mount; later refreshes go through loadProjects().
+    let alive = true
+    fetchProjects().then((result) => {
+      if (alive) {
+        applyProjects(result)
+      }
+    })
+    return () => {
+      alive = false
+    }
   }, [])
 
   const saveProject = async (event) => {
@@ -269,11 +281,18 @@ export function AdminProjectsPage() {
             Domain
             <input
               required
+              list="domain-suggestions"
+              placeholder="Pick an existing domain to keep the catalog filter tidy"
               value={form.domain}
               onChange={(event) =>
                 setForm((current) => ({ ...current, domain: event.target.value }))
               }
             />
+            <datalist id="domain-suggestions">
+              {domainOptions.map((domain) => (
+                <option key={domain} value={domain} />
+              ))}
+            </datalist>
           </label>
           <label className="compact-field form-span-two">
             Abstract

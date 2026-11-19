@@ -4,6 +4,9 @@ import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
+import { initAnalytics } from './lib/analytics.js'
+
+initAnalytics()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
