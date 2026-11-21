@@ -24,7 +24,7 @@ export function isUuid(value) {
 export const INQUIRY_STATUS = ['pending', 'active', 'completed']
 
 export const CONTACT = {
-  email: 'hello@vaishnavitech.in',
+  email: 'info@vaishnavitech.in',
   phoneDisplay: '+91 99895 72748',
   phoneHref: 'tel:+919989572748',
   whatsappNumber: '919989572748',
