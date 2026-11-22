@@ -35,3 +35,13 @@ export function whatsappUrl(
 ) {
   return `https://wa.me/${CONTACT.whatsappNumber}?text=${encodeURIComponent(message)}`
 }
+
+// Business details shown in the header, footer, contact page and home page.
+export const BUSINESS = {
+  addressLine1: 'Cheediga, Kakinada,',
+  addressLine2: 'Andhra Pradesh — 533006',
+  hoursShort: 'Mon–Sat, 10 AM – 7 PM IST',
+  hoursLong: 'Monday to Saturday, 10 AM – 7 PM IST',
+  directionsUrl:
+    'https://www.google.com/maps/dir/?api=1&destination=16.9635634%2C82.206259',
+}
