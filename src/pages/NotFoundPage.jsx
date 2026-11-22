@@ -13,10 +13,10 @@ export function NotFoundPage() {
       </p>
       <div className="actions-row">
         <Link className="button-primary" to="/">
-          Go to Home
+          Go to home
         </Link>
         <Link className="button-secondary" to="/catalog">
-          Browse Project Catalog
+          Browse the catalog
         </Link>
       </div>
     </section>

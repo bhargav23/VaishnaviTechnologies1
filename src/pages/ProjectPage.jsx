@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
-import { isUuid } from '../lib/constants.js'
+import { degreeLabel, isUuid } from '../lib/constants.js'
 import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
 
 function truncate(text, maxLength) {
@@ -20,10 +20,10 @@ function NotFoundMessage() {
       </p>
       <div className="actions-row">
         <Link className="button-primary" to="/catalog">
-          Browse Project Catalog
+          Browse the catalog
         </Link>
         <Link className="button-secondary" to="/inquire">
-          Request Mentorship
+          Request mentorship
         </Link>
       </div>
     </section>
@@ -72,7 +72,7 @@ export function ProjectPage() {
   }, [projectId, validId])
 
   useDocumentMeta({
-    title: project ? `${project.title} (${project.degree_level?.toUpperCase()} ${project.domain})` : 'Project Details',
+    title: project ? `${project.title} (${degreeLabel(project.degree_level)} ${project.domain})` : 'Project Details',
     description: project ? truncate(project.abstract, 155) : undefined,
     path: `/project/${projectId}`,
     noindex: !project,
@@ -99,13 +99,10 @@ export function ProjectPage() {
       <article className="card project-hero-card">
         <div className="card-meta">
           {project.degree_level ? (
-            <span className="pill">{project.degree_level.toUpperCase()}</span>
+            <span className="pill">{degreeLabel(project.degree_level)}</span>
           ) : null}
           {project.domain ? (
-            <span className="muted">
-              {project.degree_level ? ' · ' : ''}
-              {project.domain}
-            </span>
+            <span className="muted">{project.domain}</span>
           ) : null}
         </div>
         <h1>{project.title}</h1>
@@ -124,16 +121,16 @@ export function ProjectPage() {
         </div>
         <div className="actions-row">
           <Link className="button-primary" to={`/inquire?projectId=${project.id}`}>
-            Request Mentorship
+            Request mentorship
           </Link>
           <Link className="button-secondary" to="/catalog">
-            Back to Catalog
+            Back to catalog
           </Link>
         </div>
       </article>
       <aside className="project-sidebar">
         <article className="card elevated-card">
-          <h3>What students receive</h3>
+          <h2 className="card-title">What students receive</h2>
           <ul className="clean-list">
             <li>Working source code tailored for academic submission</li>
             <li>Report and PPT support for presentation readiness</li>
@@ -141,7 +138,7 @@ export function ProjectPage() {
           </ul>
         </article>
         <article className="card elevated-card">
-          <h3>Best suited for</h3>
+          <h2 className="card-title">Best suited for</h2>
           <p className="muted">
             Students looking for a documented and defensible project in the{' '}
             {project.domain} domain.

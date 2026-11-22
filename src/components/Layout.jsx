@@ -220,20 +220,20 @@ export function Layout() {
           <div className="footer-bottom">
             © {CURRENT_YEAR} Vaishnavi Technologies. All rights reserved.
           </div>
+          <a
+            className="whatsapp-fab"
+            href={whatsappUrl()}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Chat with us on WhatsApp"
+            onClick={() => trackContactClick('whatsapp')}
+          >
+            <WhatsAppIcon size={20} />
+            <span>WhatsApp</span>
+          </a>
         </div>
       </footer>
 
-      <a
-        className="whatsapp-fab"
-        href={whatsappUrl()}
-        target="_blank"
-        rel="noreferrer"
-        aria-label="Chat with us on WhatsApp"
-        onClick={() => trackContactClick('whatsapp')}
-      >
-        <WhatsAppIcon size={20} />
-        <span>WhatsApp</span>
-      </a>
 
       <nav className="mobile-action-bar" aria-label="Quick contact">
         <a
