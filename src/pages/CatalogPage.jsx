@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ArrowRightIcon, SearchIcon, WhatsAppIcon } from '../components/Icons.jsx'
 import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
-import { DEGREE_OPTIONS } from '../lib/constants.js'
+import { trackContactClick } from '../lib/analytics.js'
+import { DEGREE_OPTIONS, degreeLabel, whatsappUrl } from '../lib/constants.js'
 import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
 
 const PAGE_SIZE = 6
@@ -113,34 +115,45 @@ export function CatalogPage() {
   const pageStart = (safePage - 1) * PAGE_SIZE
   const visibleProjects = searchedProjects.slice(pageStart, pageStart + PAGE_SIZE)
 
+  const degreeChoices = ['all', ...DEGREE_OPTIONS]
+
   return (
     <>
-      <section className="page-header">
-        <p className="eyebrow">Project Catalog</p>
-        <h1>Discover curated B.Tech and M.Tech project options</h1>
-        <p className="page-lead">
-          Filter by degree level and explore projects prepared for academic
-          delivery, documentation, and viva support.
-        </p>
+      <section className="bleed page-band">
+        <div className="container page-band-inner">
+          <div className="intro-heading">
+            <p className="eyebrow">Project catalog</p>
+            <h1 className="page-title">Find a project to start from</h1>
+            <p className="page-lead">
+              Filter by degree and domain. Every catalog project can be tailored
+              to your requirement, with documentation and viva support.
+            </p>
+          </div>
+          <Link className="text-link" to="/inquire">
+            Can&apos;t find your topic? Request a custom project <ArrowRightIcon size={16} />
+          </Link>
+        </div>
       </section>
-      <div className="form-wrap filter-panel">
-        <label className="compact-field">
-          <span>Degree level</span>
-          <select
-            value={degreeFilter}
-            onChange={(event) => {
-              setDegreeFilter(event.target.value)
-              setCurrentPage(1)
-            }}
-          >
-            <option value="all">All</option>
-            {DEGREE_OPTIONS.map((degree) => (
-              <option key={degree} value={degree}>
-                {degree.toUpperCase()}
-              </option>
+
+      <div className="filter-panel" role="search">
+        <div className="compact-field">
+          <span id="degree-filter-label">Degree</span>
+          <div className="segmented" role="group" aria-labelledby="degree-filter-label">
+            {degreeChoices.map((degree) => (
+              <button
+                type="button"
+                key={degree}
+                aria-pressed={degreeFilter === degree}
+                onClick={() => {
+                  setDegreeFilter(degree)
+                  setCurrentPage(1)
+                }}
+              >
+                {degree === 'all' ? 'All' : degreeLabel(degree)}
+              </button>
             ))}
-          </select>
-        </label>
+          </div>
+        </div>
         <label className="compact-field">
           <span>Domain</span>
           <select
@@ -150,7 +163,7 @@ export function CatalogPage() {
               setCurrentPage(1)
             }}
           >
-            <option value="all">All</option>
+            <option value="all">All domains</option>
             {domainOptions.map((domain) => (
               <option key={domain} value={domain}>
                 {domain}
@@ -158,46 +171,44 @@ export function CatalogPage() {
             ))}
           </select>
         </label>
-        <label className="compact-field">
+        <label className="compact-field search-field">
           <span>Search</span>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(event) => {
-              setSearchTerm(event.target.value)
-              setCurrentPage(1)
-            }}
-            placeholder="Search by title or keyword..."
-          />
+          <span className="search-control">
+            <SearchIcon />
+            <input
+              type="search"
+              value={searchTerm}
+              onChange={(event) => {
+                setSearchTerm(event.target.value)
+                setCurrentPage(1)
+              }}
+              placeholder="Title or keyword"
+            />
+          </span>
         </label>
-        <div className="results-chip">
+        <p className="results-chip" aria-live="polite">
           {loading
             ? 'Loading...'
             : `${searchedProjects.length} project${searchedProjects.length === 1 ? '' : 's'} found`}
-        </div>
+        </p>
       </div>
 
       {error ? <p className="error-box">{error}</p> : null}
       {loading ? <p className="muted">Loading projects...</p> : null}
       {!loading && !searchedProjects.length ? (
-        <p className="muted">No active projects found for this filter.</p>
+        <p className="empty-state">No active projects found for this filter.</p>
       ) : null}
 
-      <section className="grid">
+      <section className="card-grid card-grid-3" aria-label="Projects">
         {visibleProjects.map((project) => (
-          <article className="card elevated-card catalog-card" key={project.id}>
+          <article className="card catalog-card" key={project.id}>
             <div className="card-meta">
               {project.degree_level ? (
-                <span className="pill">{project.degree_level.toUpperCase()}</span>
+                <span className="pill">{degreeLabel(project.degree_level)}</span>
               ) : null}
-              {project.domain ? (
-                <span className="muted">
-                  {project.degree_level ? ' · ' : ''}
-                  {project.domain}
-                </span>
-              ) : null}
+              {project.domain ? <span className="muted">{project.domain}</span> : null}
             </div>
-            <h3>{project.title}</h3>
+            <h2 className="card-title">{project.title}</h2>
             <p className="muted">{project.abstract}</p>
             <div className="tag-row">
               {project.tags?.length ? (
@@ -210,15 +221,12 @@ export function CatalogPage() {
                 <span className="muted">Technologies not listed</span>
               )}
             </div>
-            <div className="actions-row">
+            <div className="actions-row card-actions">
               <Link className="button-secondary" to={`/project/${project.id}`}>
-                View Details
+                View details
               </Link>
-              <Link
-                className="button-primary"
-                to={`/inquire?projectId=${project.id}`}
-              >
-                Inquire Now
+              <Link className="button-primary" to={`/inquire?projectId=${project.id}`}>
+                Inquire now <ArrowRightIcon size={16} />
               </Link>
             </div>
           </article>
@@ -233,7 +241,7 @@ export function CatalogPage() {
             onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
             disabled={safePage === 1}
           >
-            Prev
+            Previous
           </button>
 
           {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
@@ -258,6 +266,32 @@ export function CatalogPage() {
           </button>
         </nav>
       ) : null}
+
+      <section className="cta-panel">
+        <div>
+          <h2>Not in the catalog?</h2>
+          <p>
+            We build custom projects around your requirement — custom domain
+            selection, unique feature combinations, and an implementation you can
+            explain and defend.
+          </p>
+        </div>
+        <div className="actions-row">
+          <Link className="button-primary" to="/inquire">
+            Request a custom project
+          </Link>
+          <a
+            className="button-outline-light"
+            href={whatsappUrl()}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => trackContactClick('whatsapp')}
+          >
+            <WhatsAppIcon />
+            WhatsApp us
+          </a>
+        </div>
+      </section>
     </>
   )
 }

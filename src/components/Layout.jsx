@@ -1,8 +1,10 @@
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
 import { trackContactClick } from '../lib/analytics.js'
-import { CONTACT, whatsappUrl } from '../lib/constants.js'
+import { BUSINESS, CONTACT, whatsappUrl } from '../lib/constants.js'
 import { isSupabaseConfigured } from '../lib/supabase.js'
+import { CloseIcon, MenuIcon, PhoneIcon, WhatsAppIcon } from './Icons.jsx'
 
 const CURRENT_YEAR = new Date().getFullYear()
 
@@ -10,47 +12,96 @@ function navLinkClass({ isActive }) {
   return isActive ? 'nav-link nav-link-active' : 'nav-link'
 }
 
+// Scroll to the section named in the URL hash (for /#how, /#pricing, /#faq),
+// including when the hash changes on the page you are already on.
+function useScrollToHash() {
+  const { pathname, hash } = useLocation()
+  useEffect(() => {
+    if (!hash) {
+      return
+    }
+    const target = document.getElementById(decodeURIComponent(hash.slice(1)))
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [pathname, hash])
+}
+
 export function Layout() {
   const { user, isAdmin, profileError, refreshProfile, signOut } = useAuth()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const closeMenu = () => setMenuOpen(false)
+  useScrollToHash()
 
   return (
     <div className="app-shell">
       <header className="top-nav">
         <div className="top-nav-inner">
-          <Link to="/" className="brand">
-            <span className="brand-mark">VT</span>
-            <span>
+          <Link to="/" className="brand" onClick={closeMenu}>
+            <span className="brand-mark" aria-hidden="true">
+              VT
+            </span>
+            <span className="brand-text">
               Vaishnavi Technologies
-              <small className="brand-subtitle">Project Development Studio</small>
+              <small className="brand-subtitle">Project &amp; research mentorship</small>
             </span>
           </Link>
-          <nav className="nav-links">
-            <NavLink to="/catalog" className={navLinkClass}>
+
+          <button
+            type="button"
+            className="menu-toggle"
+            aria-expanded={menuOpen}
+            aria-controls="main-navigation"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            {menuOpen ? <CloseIcon size={22} /> : <MenuIcon size={22} />}
+          </button>
+
+          <nav
+            id="main-navigation"
+            aria-label="Main navigation"
+            className={`nav-links${menuOpen ? ' is-open' : ''}`}
+          >
+            <NavLink to="/catalog" className={navLinkClass} onClick={closeMenu}>
               Catalog
             </NavLink>
-            <NavLink to="/inquire" className={navLinkClass}>
-              Inquire
-            </NavLink>
-            <NavLink to="/contact" className={navLinkClass}>
+            <Link to="/#how" className="nav-link" onClick={closeMenu}>
+              How it works
+            </Link>
+            <Link to="/#pricing" className="nav-link" onClick={closeMenu}>
+              Pricing
+            </Link>
+            <Link to="/#faq" className="nav-link" onClick={closeMenu}>
+              FAQ
+            </Link>
+            <NavLink to="/contact" className={navLinkClass} onClick={closeMenu}>
               Contact
             </NavLink>
             {user ? (
-              <NavLink to="/dashboard" className={navLinkClass}>
+              <NavLink to="/dashboard" className={navLinkClass} onClick={closeMenu}>
                 Dashboard
               </NavLink>
             ) : null}
             {isAdmin ? (
-              <NavLink to="/admin/projects" className={navLinkClass}>
+              <NavLink to="/admin/projects" className={navLinkClass} onClick={closeMenu}>
                 Admin
               </NavLink>
             ) : null}
             {!user ? (
-              <NavLink to="/auth" className="nav-button nav-button-primary">
-                Login
+              <NavLink to="/auth" className="nav-button" onClick={closeMenu}>
+                Sign in
               </NavLink>
             ) : (
-              <button type="button" className="nav-button" onClick={signOut}>
-                Logout
+              <button
+                type="button"
+                className="nav-button"
+                onClick={() => {
+                  closeMenu()
+                  signOut()
+                }}
+              >
+                Sign out
               </button>
             )}
           </nav>
@@ -90,27 +141,27 @@ export function Layout() {
         <div className="site-footer-inner">
           <div className="footer-grid">
             <div className="footer-brand">
-              <Link to="/" className="brand">
-                <span className="brand-mark">VT</span>
-                <span>Vaishnavi Technologies</span>
-              </Link>
+              <span className="footer-name">Vaishnavi Technologies</span>
               <p className="muted">
-                B.Tech, M.Tech &amp; PhD CSE project and research mentorship —
+                B.Tech, M.Tech and PhD project and research mentorship —
                 development, documentation, and viva preparation.
               </p>
             </div>
 
             <div className="footer-col">
-              <h4>Quick Links</h4>
+              <h2>Explore</h2>
               <ul className="footer-links">
                 <li>
-                  <Link to="/catalog">Project Catalog</Link>
+                  <Link to="/catalog">Project catalog</Link>
                 </li>
                 <li>
-                  <Link to="/inquire">Inquire Now</Link>
+                  <Link to="/#how">How it works</Link>
                 </li>
                 <li>
-                  <Link to="/contact">Contact Us</Link>
+                  <Link to="/#pricing">Pricing</Link>
+                </li>
+                <li>
+                  <Link to="/#faq">FAQ</Link>
                 </li>
                 {user ? (
                   <li>
@@ -118,14 +169,14 @@ export function Layout() {
                   </li>
                 ) : (
                   <li>
-                    <Link to="/auth">Login</Link>
+                    <Link to="/auth">Sign in</Link>
                   </li>
                 )}
               </ul>
             </div>
 
             <div className="footer-col">
-              <h4>Contact</h4>
+              <h2>Contact</h2>
               <ul className="footer-links">
                 <li>
                   <a
@@ -136,10 +187,7 @@ export function Layout() {
                   </a>
                 </li>
                 <li>
-                  <a
-                    href={CONTACT.phoneHref}
-                    onClick={() => trackContactClick('phone')}
-                  >
+                  <a href={CONTACT.phoneHref} onClick={() => trackContactClick('phone')}>
                     {CONTACT.phoneDisplay}
                   </a>
                 </li>
@@ -150,22 +198,27 @@ export function Layout() {
                     rel="noreferrer"
                     onClick={() => trackContactClick('whatsapp')}
                   >
-                    WhatsApp us
+                    WhatsApp
                   </a>
                 </li>
+              </ul>
+            </div>
+
+            <div className="footer-col">
+              <h2>Visit</h2>
+              <ul className="footer-links">
                 <li className="footer-address">
-                  Cheediga,
+                  {BUSINESS.addressLine1}
                   <br />
-                  Kakinada, Andhra Pradesh - 533006
+                  {BUSINESS.addressLine2}
                 </li>
+                <li className="muted">{BUSINESS.hoursShort}</li>
               </ul>
             </div>
           </div>
 
           <div className="footer-bottom">
-            <span>
-              © {CURRENT_YEAR} Vaishnavi Technologies. All rights reserved.
-            </span>
+            © {CURRENT_YEAR} Vaishnavi Technologies. All rights reserved.
           </div>
         </div>
       </footer>
@@ -178,21 +231,33 @@ export function Layout() {
         aria-label="Chat with us on WhatsApp"
         onClick={() => trackContactClick('whatsapp')}
       >
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          width="22"
-          height="22"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5Z" />
-        </svg>
+        <WhatsAppIcon size={20} />
         <span>WhatsApp</span>
       </a>
+
+      <nav className="mobile-action-bar" aria-label="Quick contact">
+        <a
+          className="button-whatsapp"
+          href={whatsappUrl()}
+          target="_blank"
+          rel="noreferrer"
+          onClick={() => trackContactClick('whatsapp')}
+        >
+          <WhatsAppIcon size={16} />
+          WhatsApp
+        </a>
+        <a
+          className="button-secondary"
+          href={CONTACT.phoneHref}
+          onClick={() => trackContactClick('phone')}
+        >
+          <PhoneIcon size={16} />
+          Call
+        </a>
+        <Link className="button-primary" to="/inquire">
+          Inquire
+        </Link>
+      </nav>
     </div>
   )
 }
