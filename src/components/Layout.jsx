@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
 import { trackContactClick } from '../lib/analytics.js'
@@ -82,9 +82,14 @@ export function Layout() {
               </NavLink>
             ) : null}
             {isAdmin ? (
-              <NavLink to="/admin/projects" className={navLinkClass} onClick={closeMenu}>
-                Admin
-              </NavLink>
+              <>
+                <NavLink to="/admin/inquiries" className={navLinkClass} onClick={closeMenu}>
+                  Inquiries
+                </NavLink>
+                <NavLink to="/admin/projects" className={navLinkClass} onClick={closeMenu}>
+                  Projects
+                </NavLink>
+              </>
             ) : null}
             {!user ? (
               <NavLink to="/auth" className="nav-button" onClick={closeMenu}>
@@ -132,7 +137,9 @@ export function Layout() {
             </button>
           </div>
         ) : null}
-        <Outlet />
+        <Suspense fallback={<p className="muted">Loading...</p>}>
+          <Outlet />
+        </Suspense>
       </main>
 
       <footer className="site-footer">

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { AdminTabs } from '../components/AdminTabs.jsx'
 import { DEGREE_OPTIONS } from '../lib/constants.js'
 import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
 import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
@@ -229,6 +230,7 @@ export function AdminProjectsPage() {
           listings current.
         </p>
       </section>
+      <AdminTabs />
       <section className="stats-grid dashboard-stats">
         <article className="stat-card light-stat">
           <strong>{projects.length}</strong>

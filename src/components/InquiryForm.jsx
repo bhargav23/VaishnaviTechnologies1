@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
+import { HoneypotField, PhoneField } from './FormFields.jsx'
 import { OWN_TOPIC, useInquiryForm } from '../hooks/useInquiryForm.js'
 import { trackContactClick } from '../lib/analytics.js'
 import {
@@ -36,6 +37,10 @@ export function InquiryForm({
     success,
     onSubmit,
   } = useInquiryForm({ initialDegree, urlProjectId, withProjects: !compact })
+
+  const phoneField = (
+    <PhoneField value={form.phone} onChange={updateField('phone')} />
+  )
 
   return (
     <>
@@ -90,38 +95,46 @@ export function InquiryForm({
           </div>
 
           {compact ? (
-            <label className="compact-field">
-              Degree
-              <select value={form.degree} onChange={updateField('degree')}>
-                {STUDENT_DEGREE_OPTIONS.map((degree) => (
-                  <option key={degree} value={degree}>
-                    {degreeLabel(degree)}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className="form-row-two">
+              {phoneField}
+              <label className="compact-field">
+                Degree
+                <select value={form.degree} onChange={updateField('degree')}>
+                  {STUDENT_DEGREE_OPTIONS.map((degree) => (
+                    <option key={degree} value={degree}>
+                      {degreeLabel(degree)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
           ) : (
-            <fieldset className="degree-fieldset">
-              <legend>Degree</legend>
-              <div className="degree-options">
-                {STUDENT_DEGREE_OPTIONS.map((degree) => (
-                  <label
-                    key={degree}
-                    className={`degree-option${form.degree === degree ? ' is-selected' : ''}`}
-                  >
-                    <input
-                      type="radio"
-                      name={radioName}
-                      value={degree}
-                      checked={form.degree === degree}
-                      onChange={() => setDegree(degree)}
-                    />
-                    {degreeLabel(degree)}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
+            <>
+              {phoneField}
+              <fieldset className="degree-fieldset">
+                <legend>Degree</legend>
+                <div className="degree-options">
+                  {STUDENT_DEGREE_OPTIONS.map((degree) => (
+                    <label
+                      key={degree}
+                      className={`degree-option${form.degree === degree ? ' is-selected' : ''}`}
+                    >
+                      <input
+                        type="radio"
+                        name={radioName}
+                        value={degree}
+                        checked={form.degree === degree}
+                        onChange={() => setDegree(degree)}
+                      />
+                      {degreeLabel(degree)}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            </>
           )}
+
+          <HoneypotField value={form.website} onChange={updateField('website')} />
 
           {compact ? null : (
             <label className="compact-field">

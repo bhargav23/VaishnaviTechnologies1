@@ -45,3 +45,34 @@ export const BUSINESS = {
   directionsUrl:
     'https://www.google.com/maps/dir/?api=1&destination=16.9635634%2C82.206259',
 }
+
+// What a catalog project includes and what it costs, by degree. Shown on
+// each project page; keep in step with the pricing section on the home page.
+export const PROJECT_PACKAGES = {
+  btech: {
+    included: [
+      'Working source code you can run and explain',
+      'Project report for your submission',
+      'PPT for your project reviews',
+      'Viva preparation',
+    ],
+    price: '₹1,500 – ₹8,000',
+    priceNote:
+      'Mini projects from ₹1,500, major projects ₹4,000 – ₹8,000. Your quote depends on scope.',
+    suitedFor: (domain) =>
+      `B.Tech CSE / IT students who want a documented ${domain} project they can explain and defend in reviews and viva.`,
+  },
+  mtech: {
+    included: [
+      'Research-oriented implementation you can explain',
+      'Thesis documentation and PPT',
+      'Research paper mentoring',
+      'Similarity check',
+      'Viva preparation',
+    ],
+    price: '₹10,000 – ₹30,000+',
+    priceNote: 'Thesis-level projects. Your quote depends on scope.',
+    suitedFor: (domain) =>
+      `M.Tech students who need a thesis-level ${domain} project with research and paper support.`,
+  },
+}

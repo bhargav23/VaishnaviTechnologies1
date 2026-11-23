@@ -3,5 +3,6 @@ Allow: /
 Disallow: /admin
 Disallow: /dashboard
 Disallow: /auth
+Disallow: /route-pages/
 
 Sitemap: https://vaishnavitech.in/sitemap.xml

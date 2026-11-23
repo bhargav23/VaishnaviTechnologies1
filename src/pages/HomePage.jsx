@@ -12,6 +12,7 @@ import {
 } from '../components/Icons.jsx'
 import { InquiryForm } from '../components/InquiryForm.jsx'
 import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
+import { PAGE_META } from '../lib/pageMeta.js'
 import { trackContactClick } from '../lib/analytics.js'
 import { BUSINESS, CONTACT, whatsappUrl } from '../lib/constants.js'
 
@@ -160,12 +161,7 @@ const faqs = [
 ]
 
 export function HomePage() {
-  useDocumentMeta({
-    title: 'B.Tech, M.Tech & PhD CSE Project Mentorship',
-    description:
-      'CSE project and research mentorship in Kakinada for B.Tech, M.Tech and PhD students: catalog, custom-built and guided projects with documentation, PPT and viva preparation. Transparent pricing.',
-    path: '/',
-  })
+  useDocumentMeta(PAGE_META.home)
 
   return (
     <div className="home">

@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router-dom'
 import { WhatsAppIcon } from '../components/Icons.jsx'
 import { InquiryForm } from '../components/InquiryForm.jsx'
 import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
+import { PAGE_META } from '../lib/pageMeta.js'
 import { trackContactClick } from '../lib/analytics.js'
 import { BUSINESS, CONTACT, whatsappUrl } from '../lib/constants.js'
 
@@ -16,12 +17,7 @@ const requestTypes = [
 ]
 
 export function InquirePage() {
-  useDocumentMeta({
-    title: 'Request Mentorship',
-    description:
-      'Submit your B.Tech, M.Tech or PhD project or research requirement and get matched with the right mentorship track: catalog, custom-built, or guided support.',
-    path: '/inquire',
-  })
+  useDocumentMeta(PAGE_META.inquire)
 
   const [searchParams] = useSearchParams()
 

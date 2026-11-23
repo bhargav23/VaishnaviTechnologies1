@@ -29,8 +29,16 @@ create table if not exists public.inquiries (
   project_id uuid references public.projects(id) on delete restrict,
   name text not null,
   email text not null,
-  degree text not null check (degree in ('btech', 'mtech', 'phd')),
+  -- Required for inquiries; optional for Contact page messages.
+  degree text check (degree in ('btech', 'mtech', 'phd')),
   message text not null,
+  -- Optional phone / WhatsApp number, normalised to digits with an optional "+".
+  phone text,
+  -- One-way hash of the sender's IP, used only for rate limiting.
+  client_hash text,
+  -- 'inquiry' (inquiry forms) or 'contact' (Contact page), with its subject.
+  source text not null default 'inquiry',
+  subject text,
   status text not null default 'pending' check (status in ('pending', 'active', 'completed')),
   created_at timestamptz not null default timezone('utc', now())
 );
@@ -179,6 +187,25 @@ create index if not exists idx_inquiries_student on public.inquiries (student_id
 create index if not exists idx_inquiries_status on public.inquiries (status, created_at desc);
 create index if not exists idx_inquiries_email_created_at on public.inquiries (lower(btrim(email)), created_at desc);
 
+-- Phone and spam protection. Same SQL as
+-- supabase/migrations/20261123_inquiry_phone_and_spam_guard.sql. Safe to re-run.
+alter table public.inquiries add column if not exists phone text;
+alter table public.inquiries add column if not exists client_hash text;
+
+alter table public.inquiries drop constraint if exists inquiries_phone_format;
+alter table public.inquiries add constraint inquiries_phone_format
+  check (phone is null or phone ~ '^\+?[0-9]{10,15}$');
+
+alter table public.inquiries drop constraint if exists inquiries_email_format;
+alter table public.inquiries add constraint inquiries_email_format
+  check (email ~* '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$');
+
+create index if not exists idx_inquiries_client_created_at
+  on public.inquiries (client_hash, created_at desc)
+  where client_hash is not null;
+create index if not exists idx_inquiries_created_at
+  on public.inquiries (created_at desc);
+
 create or replace function public.limit_inquiry_submissions()
 returns trigger
 language plpgsql
@@ -188,18 +215,63 @@ as $$
 declare
   recent_count integer;
   normalized_email text := lower(btrim(new.email));
+  request_headers json := nullif(current_setting('request.headers', true), '')::json;
+  client_ip text := btrim(split_part(coalesce(
+    request_headers ->> 'x-forwarded-for',
+    request_headers ->> 'cf-connecting-ip',
+    ''
+  ), ',', 1));
 begin
-  new.email := lower(btrim(new.email));
-  perform pg_advisory_xact_lock(hashtextextended(normalized_email, 0));
+  new.email := normalized_email;
 
+  -- Phone: keep digits and a leading "+"; an empty value means no phone.
+  if new.phone is not null then
+    new.phone := regexp_replace(btrim(new.phone), '[^0-9+]', '', 'g');
+    if new.phone = '' then
+      new.phone := null;
+    end if;
+  end if;
+
+  -- Link spam: real inquiries rarely contain more than a couple of links.
+  if (select count(*) from regexp_matches(new.message, '(https?://|www\.)', 'gi')) > 2 then
+    raise exception 'Please remove links from your message and try again.'
+      using errcode = 'P0001';
+  end if;
+
+  -- Per email: 3 an hour.
+  perform pg_advisory_xact_lock(hashtextextended(normalized_email, 0));
   select count(*)
   into recent_count
   from public.inquiries i
   where lower(btrim(i.email)) = normalized_email
     and i.created_at > now() - interval '1 hour';
-
   if recent_count >= 3 then
     raise exception 'Inquiry limit reached. Please try again later.'
+      using errcode = 'P0001';
+  end if;
+
+  -- Per network: 5 an hour. Only a salted hash of the IP is kept.
+  new.client_hash := null;
+  if client_ip <> '' then
+    new.client_hash := md5(client_ip || ':vaishnavitech-inquiries');
+    select count(*)
+    into recent_count
+    from public.inquiries i
+    where i.client_hash = new.client_hash
+      and i.created_at > now() - interval '1 hour';
+    if recent_count >= 5 then
+      raise exception 'Inquiry limit reached. Please try again later.'
+        using errcode = 'P0001';
+    end if;
+  end if;
+
+  -- Whole site: 30 in 10 minutes.
+  select count(*)
+  into recent_count
+  from public.inquiries i
+  where i.created_at > now() - interval '10 minutes';
+  if recent_count >= 30 then
+    raise exception 'We are receiving a lot of requests right now. Please try again in a few minutes or message us on WhatsApp.'
       using errcode = 'P0001';
   end if;
 
@@ -211,6 +283,24 @@ drop trigger if exists limit_inquiry_submissions on public.inquiries;
 create trigger limit_inquiry_submissions
 before insert on public.inquiries
 for each row execute procedure public.limit_inquiry_submissions();
+
+-- Contact page messages. Same SQL as
+-- supabase/migrations/20261124_contact_form_messages.sql. Safe to re-run.
+alter table public.inquiries add column if not exists source text not null default 'inquiry';
+alter table public.inquiries add column if not exists subject text;
+alter table public.inquiries alter column degree drop not null;
+
+alter table public.inquiries drop constraint if exists inquiries_source_check;
+alter table public.inquiries add constraint inquiries_source_check
+  check (source in ('inquiry', 'contact'));
+
+alter table public.inquiries drop constraint if exists inquiries_subject_length;
+alter table public.inquiries add constraint inquiries_subject_length
+  check (subject is null or char_length(subject) <= 150);
+
+alter table public.inquiries drop constraint if exists inquiries_degree_required;
+alter table public.inquiries add constraint inquiries_degree_required
+  check (source = 'contact' or degree is not null);
 
 create or replace function public.handle_new_user()
 returns trigger

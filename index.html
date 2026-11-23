@@ -6,7 +6,9 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vaishnavi Technologies | B.Tech, M.Tech &amp; PhD CSE Project Mentorship</title>
+    <!-- Open the connection to the database early; the catalog and forms use it. -->
+    <link rel="preconnect" href="https://ypxuyecibkehgzinhice.supabase.co" crossorigin />
+    <title>B.Tech, M.Tech &amp; PhD CSE Project Mentorship | Vaishnavi Technologies</title>
     <meta
       name="description"
       content="CSE project and research mentorship in Kakinada for B.Tech, M.Tech and PhD students: catalog, custom-built and guided projects with documentation, PPT and viva preparation."
@@ -17,7 +19,7 @@
     <meta property="og:site_name" content="Vaishnavi Technologies" />
     <meta
       property="og:title"
-      content="Vaishnavi Technologies | B.Tech, M.Tech &amp; PhD CSE Project Mentorship"
+      content="B.Tech, M.Tech &amp; PhD CSE Project Mentorship | Vaishnavi Technologies"
     />
     <meta
       property="og:description"
@@ -29,7 +31,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
-      content="Vaishnavi Technologies | B.Tech, M.Tech &amp; PhD CSE Project Mentorship"
+      content="B.Tech, M.Tech &amp; PhD CSE Project Mentorship | Vaishnavi Technologies"
     />
     <meta
       name="twitter:description"
@@ -40,13 +42,19 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "EducationalOrganization",
+        "@type": [
+          "EducationalOrganization",
+          "LocalBusiness"
+        ],
+        "@id": "https://vaishnavitech.in/#business",
         "name": "Vaishnavi Technologies",
         "url": "https://vaishnavitech.in",
         "logo": "https://vaishnavitech.in/logo-512.png",
+        "image": "https://vaishnavitech.in/og-image.png",
         "description": "B.Tech, M.Tech and PhD CSE project and research mentorship studio offering catalog, custom-built, and guided projects with documentation, PPT, and viva preparation.",
         "email": "info@vaishnavitech.in",
         "telephone": "+91-99895-72748",
+        "priceRange": "₹1,500 – ₹30,000+",
         "address": {
           "@type": "PostalAddress",
           "streetAddress": "Cheediga",
@@ -54,7 +62,28 @@
           "addressRegion": "Andhra Pradesh",
           "postalCode": "533006",
           "addressCountry": "IN"
-        }
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 16.9635634,
+          "longitude": 82.206259
+        },
+        "hasMap": "https://maps.google.com/?cid=6090890704764918421",
+        "openingHoursSpecification": [
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "opens": "10:00",
+            "closes": "19:00"
+          }
+        ]
       }
     </script>
   </head>

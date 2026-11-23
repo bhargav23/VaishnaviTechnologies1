@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../hooks/useAuth.js'
 import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
 import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
+import { degreeLabel } from '../lib/constants.js'
 
 function statusClass(status) {
   if (status === 'active') {
@@ -102,10 +103,11 @@ export function DashboardPage() {
               {inquiry.status?.toUpperCase()}
             </div>
             <h3>{inquiry.projects?.title ?? 'General inquiry'}</h3>
-            <p className="muted">
-              {inquiry.projects?.domain} ·{' '}
-              {inquiry.projects?.degree_level?.toUpperCase()}
-            </p>
+            {inquiry.projects ? (
+              <p className="muted">
+                {inquiry.projects.domain} · {degreeLabel(inquiry.projects.degree_level)}
+              </p>
+            ) : null}
             <p>{inquiry.message}</p>
             <p className="muted">
               Requested on {new Date(inquiry.created_at).toLocaleDateString()}

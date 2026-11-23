@@ -1,22 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAuth } from './useAuth.js'
 import { trackLead } from '../lib/analytics.js'
-import { CONTACT, STUDENT_DEGREE_OPTIONS } from '../lib/constants.js'
+import { STUDENT_DEGREE_OPTIONS } from '../lib/constants.js'
+import { friendlyInsertError, looksLikeBot } from '../lib/formGuards.js'
 import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
 
 // Value of the "not in the catalog" choice in the project dropdown. It is
 // stored as a NULL project_id.
 export const OWN_TOPIC = ''
-
-function friendlyInsertError(insertError) {
-  // 23514 = check constraint, 23502 = not-null constraint. These mean the
-  // database has not been migrated for this request type yet (see
-  // supabase/migrations) or a field is outside the allowed limits.
-  if (insertError?.code === '23514' || insertError?.code === '23502') {
-    return `We couldn't save this request right now. Please message us on WhatsApp or call ${CONTACT.phoneDisplay} and we'll help you directly.`
-  }
-  return insertError?.message || 'Something went wrong. Please try again.'
-}
 
 /**
  * Shared state and submit logic for the inquiry forms on the home page and
@@ -38,9 +29,12 @@ export function useInquiryForm({
   const [form, setForm] = useState(() => ({
     name: '',
     email: '',
+    phone: '',
     degree: STUDENT_DEGREE_OPTIONS.includes(initialDegree) ? initialDegree : 'btech',
     message: '',
+    website: '', // honeypot: hidden from people, filled in by bots
   }))
+  const startedAt = useRef(0)
   // null = the visitor has not picked anything yet, so fall back to the
   // project in the URL (if it exists) or "own topic".
   const [projectChoice, setProjectChoice] = useState(null)
@@ -64,6 +58,10 @@ export function useInquiryForm({
       degree: profile?.degree || current.degree,
     }))
   }
+
+  useEffect(() => {
+    startedAt.current = Date.now()
+  }, [])
 
   useEffect(() => {
     if (!withProjects || !isSupabaseConfigured || !supabase) {
@@ -109,6 +107,12 @@ export function useInquiryForm({
     }
     setError('')
     setSuccess(false)
+
+    if (looksLikeBot(form.website, startedAt.current)) {
+      setSuccess(true)
+      return
+    }
+
     setSubmitting(true)
 
     try {
@@ -117,6 +121,7 @@ export function useInquiryForm({
         project_id: projectId || null,
         name: form.name.trim(),
         email: form.email.trim(),
+        phone: form.phone.trim() || null,
         degree: form.degree,
         message: form.message.trim(),
         status: 'pending',
