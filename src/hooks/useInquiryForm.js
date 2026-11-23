@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAuth } from './useAuth.js'
 import { trackLead } from '../lib/analytics.js'
 import { CONTACT, STUDENT_DEGREE_OPTIONS } from '../lib/constants.js'
@@ -8,7 +8,19 @@ import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
 // stored as a NULL project_id.
 export const OWN_TOPIC = ''
 
+// Bots that fill every field, or submit within a moment of the page
+// loading, are treated as spam: they see the normal success message, but
+// nothing is saved.
+const MIN_FILL_TIME_MS = 3000
+
 function friendlyInsertError(insertError) {
+  const text = insertError?.message ?? ''
+  if (text.includes('inquiries_phone_format')) {
+    return 'Please enter a valid phone number: 10 digits, or with your country code (for example +91 98765 43210).'
+  }
+  if (text.includes('inquiries_email_format')) {
+    return 'Please enter a valid email address.'
+  }
   // 23514 = check constraint, 23502 = not-null constraint. These mean the
   // database has not been migrated for this request type yet (see
   // supabase/migrations) or a field is outside the allowed limits.
@@ -38,9 +50,12 @@ export function useInquiryForm({
   const [form, setForm] = useState(() => ({
     name: '',
     email: '',
+    phone: '',
     degree: STUDENT_DEGREE_OPTIONS.includes(initialDegree) ? initialDegree : 'btech',
     message: '',
+    website: '', // honeypot: hidden from people, filled in by bots
   }))
+  const startedAt = useRef(0)
   // null = the visitor has not picked anything yet, so fall back to the
   // project in the URL (if it exists) or "own topic".
   const [projectChoice, setProjectChoice] = useState(null)
@@ -64,6 +79,10 @@ export function useInquiryForm({
       degree: profile?.degree || current.degree,
     }))
   }
+
+  useEffect(() => {
+    startedAt.current = Date.now()
+  }, [])
 
   useEffect(() => {
     if (!withProjects || !isSupabaseConfigured || !supabase) {
@@ -109,6 +128,14 @@ export function useInquiryForm({
     }
     setError('')
     setSuccess(false)
+
+    const looksLikeBot =
+      form.website.trim() !== '' || Date.now() - startedAt.current < MIN_FILL_TIME_MS
+    if (looksLikeBot) {
+      setSuccess(true)
+      return
+    }
+
     setSubmitting(true)
 
     try {
@@ -117,6 +144,7 @@ export function useInquiryForm({
         project_id: projectId || null,
         name: form.name.trim(),
         email: form.email.trim(),
+        phone: form.phone.trim() || null,
         degree: form.degree,
         message: form.message.trim(),
         status: 'pending',

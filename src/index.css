@@ -659,6 +659,20 @@ button:disabled {
   color: var(--text);
 }
 
+.compact-field .optional {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* Spam trap field: kept off screen (not display:none, which some bots skip). */
+.honeypot {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 input,
 select,
 textarea {
@@ -1850,6 +1864,14 @@ a.contact-tile:hover {
 
 .button-danger-outline:hover {
   border-color: var(--danger);
+}
+
+.button-whatsapp-outline {
+  color: var(--whatsapp);
+}
+
+.button-whatsapp-outline:hover {
+  border-color: var(--whatsapp);
 }
 
 .visually-hidden {

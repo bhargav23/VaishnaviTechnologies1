@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AdminTabs } from '../components/AdminTabs.jsx'
-import { MailIcon } from '../components/Icons.jsx'
+import { MailIcon, PhoneIcon, WhatsAppIcon } from '../components/Icons.jsx'
 import {
   CONTACT,
   INQUIRY_STATUS,
@@ -43,12 +43,48 @@ function replyHref(inquiry) {
     '',
     'Regards,',
     'Vaishnavi Technologies',
-    CONTACT.phoneDisplay,
+    `${CONTACT.phoneDisplay} · ${CONTACT.email}`,
+    'https://vaishnavitech.in',
     '',
     `--- Your message (${formatSubmitted(inquiry.created_at)}) ---`,
     inquiry.message ?? '',
   ].join('\n')
   return `mailto:${inquiry.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+}
+
+// Phone numbers are stored as digits with an optional leading "+". A bare
+// 10-digit number (or one with a leading 0) is treated as Indian (+91).
+function internationalDigits(phone) {
+  const raw = String(phone ?? '').trim()
+  const digits = raw.replace(/\D/g, '')
+  if (!digits) {
+    return ''
+  }
+  if (raw.startsWith('+')) {
+    return digits
+  }
+  if (digits.length === 10) {
+    return `91${digits}`
+  }
+  if (digits.length === 11 && digits.startsWith('0')) {
+    return `91${digits.slice(1)}`
+  }
+  return digits
+}
+
+function displayPhone(phone) {
+  const digits = internationalDigits(phone)
+  if (digits.length === 12 && digits.startsWith('91')) {
+    return `+91 ${digits.slice(2, 7)} ${digits.slice(7)}`
+  }
+  return digits ? `+${digits}` : ''
+}
+
+function whatsappReplyHref(inquiry) {
+  const firstName = (inquiry.name || '').trim().split(/\s+/)[0] || 'there'
+  const about = inquiry.projects?.title ? ` about "${inquiry.projects.title}"` : ''
+  const text = `Hi ${firstName}, this is Vaishnavi Technologies. Thank you for your ${degreeLabel(inquiry.degree)} inquiry${about}.`
+  return `https://wa.me/${internationalDigits(inquiry.phone)}?text=${encodeURIComponent(text)}`
 }
 
 function statusClass(status) {
@@ -81,7 +117,7 @@ export function AdminInquiriesPage() {
     supabase
       .from('inquiries')
       .select(
-        'id,name,email,degree,message,status,created_at,projects(id,title,domain)',
+        'id,name,email,phone,degree,message,status,created_at,projects(id,title,domain)',
       )
       .order('created_at', { ascending: false })
 
@@ -138,6 +174,7 @@ export function AdminInquiriesPage() {
         const haystack = [
           inquiry.name,
           inquiry.email,
+          inquiry.phone,
           inquiry.projects?.title,
         ]
           .filter(Boolean)
@@ -276,7 +313,7 @@ export function AdminInquiriesPage() {
             type="text"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Name, email, or project..."
+            placeholder="Name, email, phone, or project..."
           />
         </label>
         <div className="results-chip">
@@ -318,6 +355,13 @@ export function AdminInquiriesPage() {
                       {inquiry.email}
                     </a>
                   </div>
+                  {inquiry.phone ? (
+                    <div>
+                      <a className="text-link" href={`tel:+${internationalDigits(inquiry.phone)}`}>
+                        {displayPhone(inquiry.phone)}
+                      </a>
+                    </div>
+                  ) : null}
                   <div className="muted">{degreeLabel(inquiry.degree)}</div>
                 </td>
                 <td>
@@ -373,10 +417,36 @@ export function AdminInquiriesPage() {
                     </div>
                   ) : (
                     <div className="row-actions">
-                      <a className="button-primary button-small" href={replyHref(inquiry)}>
+                      <a
+                        className="button-primary button-small"
+                        href={replyHref(inquiry)}
+                        title="Opens your email app with a reply ready. Set Zoho Mail as your email app so it goes from info@vaishnavitech.in."
+                      >
                         <MailIcon size={16} />
                         Reply
                       </a>
+                      {inquiry.phone ? (
+                        <>
+                          <a
+                            className="button-secondary button-small button-whatsapp-outline"
+                            href={whatsappReplyHref(inquiry)}
+                            target="_blank"
+                            rel="noreferrer"
+                            aria-label={`WhatsApp ${inquiry.name}`}
+                          >
+                            <WhatsAppIcon size={16} />
+                            WhatsApp
+                          </a>
+                          <a
+                            className="button-secondary button-small"
+                            href={`tel:+${internationalDigits(inquiry.phone)}`}
+                            aria-label={`Call ${inquiry.name}`}
+                          >
+                            <PhoneIcon size={16} />
+                            Call
+                          </a>
+                        </>
+                      ) : null}
                       <button
                         type="button"
                         className="button-secondary button-small button-danger-outline"
