@@ -82,9 +82,14 @@ export function Layout() {
               </NavLink>
             ) : null}
             {isAdmin ? (
-              <NavLink to="/admin/projects" className={navLinkClass} onClick={closeMenu}>
-                Admin
-              </NavLink>
+              <>
+                <NavLink to="/admin/inquiries" className={navLinkClass} onClick={closeMenu}>
+                  Inquiries
+                </NavLink>
+                <NavLink to="/admin/projects" className={navLinkClass} onClick={closeMenu}>
+                  Projects
+                </NavLink>
+              </>
             ) : null}
             {!user ? (
               <NavLink to="/auth" className="nav-button" onClick={closeMenu}>
