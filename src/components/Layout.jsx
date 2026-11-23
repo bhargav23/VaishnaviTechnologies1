@@ -38,9 +38,7 @@ export function Layout() {
       <header className="top-nav">
         <div className="top-nav-inner">
           <Link to="/" className="brand" onClick={closeMenu}>
-            <span className="brand-mark" aria-hidden="true">
-              VT
-            </span>
+            <img className="brand-mark" src="/logo-mark.svg" alt="" width="52" height="40" />
             <span className="brand-text">
               Vaishnavi Technologies
               <small className="brand-subtitle">Project &amp; research mentorship</small>
@@ -141,7 +139,14 @@ export function Layout() {
         <div className="site-footer-inner">
           <div className="footer-grid">
             <div className="footer-brand">
-              <span className="footer-name">Vaishnavi Technologies</span>
+              <img
+                className="footer-logo"
+                src="/logo.svg"
+                alt="Vaishnavi Technologies"
+                width="187"
+                height="50"
+                loading="lazy"
+              />
               <p className="muted">
                 B.Tech, M.Tech and PhD project and research mentorship —
                 development, documentation, and viva preparation.
