@@ -5,6 +5,12 @@
 [functions]
   directory = "netlify/functions"
 
+# Google Analytics 4 (property "Vaishnavi Technologies"). Production only, so
+# deploy previews don't add test visits to the reports. The ID is public: it
+# appears in the page source of every site that uses Analytics.
+[context.production.environment]
+  VITE_GA_MEASUREMENT_ID = "G-QKKTV0W3FL"
+
 [[redirects]]
   from = "/sitemap.xml"
   to = "/.netlify/functions/sitemap"
