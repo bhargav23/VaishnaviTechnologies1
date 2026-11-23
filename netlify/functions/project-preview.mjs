@@ -1,3 +1,5 @@
+const DEGREE_LABELS = { btech: 'B.Tech', mtech: 'M.Tech', phd: 'PhD' }
+
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -48,7 +50,7 @@ function updateProjectMetadata(html, project, projectUrl) {
   const title = `${project.title} | Vaishnavi Technologies`
   const description =
     project.abstract ||
-    `${project.degree_level.toUpperCase()} ${project.domain} academic project with mentorship from Vaishnavi Technologies.`
+    `${DEGREE_LABELS[project.degree_level] ?? String(project.degree_level ?? '').toUpperCase()} ${project.domain} academic project with mentorship from Vaishnavi Technologies.`
 
   html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`)
   html = replaceMeta(html, 'name="description"', description)

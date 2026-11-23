@@ -12,7 +12,7 @@ function useMode() {
 export function AuthPage() {
   const mode = useMode()
   useDocumentMeta({
-    title: mode === 'signup' ? 'Create Account' : 'Login',
+    title: mode === 'signup' ? 'Create Account' : 'Sign In',
     path: '/auth',
     noindex: true,
   })
@@ -136,14 +136,14 @@ export function AuthPage() {
             {loading
               ? 'Please wait...'
               : mode === 'signup'
-                ? 'Create Account'
-                : 'Login'}
+                ? 'Create account'
+                : 'Sign in'}
           </button>
         </form>
         <p className="muted">
           {mode === 'signup' ? (
             <>
-              Already have an account? <Link to="/auth?mode=signin">Login</Link>
+              Already have an account? <Link to="/auth?mode=signin">Sign in</Link>
             </>
           ) : (
             <>
