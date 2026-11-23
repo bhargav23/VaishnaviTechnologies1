@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
-import { degreeLabel, isUuid } from '../lib/constants.js'
+import { CheckIcon } from '../components/Icons.jsx'
+import { PROJECT_PACKAGES, degreeLabel, isUuid } from '../lib/constants.js'
 import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
 
 function truncate(text, maxLength) {
@@ -94,6 +95,8 @@ export function ProjectPage() {
     return <NotFoundMessage />
   }
 
+  const pkg = PROJECT_PACKAGES[project.degree_level] ?? PROJECT_PACKAGES.btech
+
   return (
     <section className="project-layout">
       <article className="card project-hero-card">
@@ -130,19 +133,27 @@ export function ProjectPage() {
       </article>
       <aside className="project-sidebar">
         <article className="card elevated-card">
-          <h2 className="card-title">What students receive</h2>
-          <ul className="clean-list">
-            <li>Working source code tailored for academic submission</li>
-            <li>Report and PPT support for presentation readiness</li>
-            <li>Guidance for viva and project explanation</li>
+          <h2 className="card-title">What you get</h2>
+          <ul className="check-list">
+            {pkg.included.map((item) => (
+              <li key={item}>
+                <CheckIcon size={16} />
+                {item}
+              </li>
+            ))}
           </ul>
         </article>
         <article className="card elevated-card">
+          <h2 className="card-title">Price</h2>
+          <p className="project-price">{pkg.price}</p>
+          <p className="muted">{pkg.priceNote}</p>
+          <Link className="text-link" to="/#pricing">
+            See pricing and add-ons
+          </Link>
+        </article>
+        <article className="card elevated-card">
           <h2 className="card-title">Best suited for</h2>
-          <p className="muted">
-            Students looking for a documented and defensible project in the{' '}
-            {project.domain} domain.
-          </p>
+          <p className="muted">{pkg.suitedFor(project.domain || 'CSE')}</p>
         </article>
       </aside>
     </section>

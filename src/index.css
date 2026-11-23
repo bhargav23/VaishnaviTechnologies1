@@ -983,6 +983,29 @@ a.contact-tile:hover {
   gap: 16px;
 }
 
+.project-sidebar .check-list {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.project-sidebar .check-list li {
+  align-items: flex-start;
+}
+
+.project-sidebar .check-list .icon {
+  flex: none;
+  margin-top: 3px;
+}
+
+.project-price {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
 /* ---------- Catalog ---------- */
 
 .page-band {
@@ -1751,6 +1774,45 @@ a.contact-tile:hover {
     height: 300px;
   }
 
+  /* Two per row on phones so the home page is not one long column. */
+  .card-grid-4,
+  .stage-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .kit-card {
+    gap: 8px;
+    padding: 18px;
+  }
+
+  .kit-card h3 {
+    font-size: 16px;
+  }
+
+  .kit-card p {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .stage-grid li {
+    gap: 6px;
+    padding: 14px 16px;
+  }
+
+  .stage-grid strong {
+    font-size: 15px;
+  }
+
+  .steps {
+    gap: 20px;
+  }
+
+  .steps li {
+    gap: 6px;
+    padding-top: 14px;
+  }
+
   .whatsapp-fab {
     display: none;
   }
@@ -1864,6 +1926,13 @@ a.contact-tile:hover {
 
 .button-danger-outline:hover {
   border-color: var(--danger);
+}
+
+.pill-contact {
+  margin-bottom: 6px;
+  white-space: nowrap;
+  background: #eef1fd;
+  color: var(--accent);
 }
 
 .button-whatsapp-outline {

@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
+import { HoneypotField, PhoneField } from './FormFields.jsx'
 import { OWN_TOPIC, useInquiryForm } from '../hooks/useInquiryForm.js'
 import { trackContactClick } from '../lib/analytics.js'
 import {
@@ -38,22 +39,7 @@ export function InquiryForm({
   } = useInquiryForm({ initialDegree, urlProjectId, withProjects: !compact })
 
   const phoneField = (
-    <label className="compact-field">
-      <span>
-        Phone / WhatsApp <span className="optional">(optional)</span>
-      </span>
-      <input
-        type="tel"
-        inputMode="tel"
-        autoComplete="tel"
-        maxLength={20}
-        pattern="\+?[0-9][0-9 \-]{8,18}"
-        title="10-digit mobile number, or with country code, e.g. +91 98765 43210"
-        placeholder="98765 43210"
-        value={form.phone}
-        onChange={updateField('phone')}
-      />
-    </label>
+    <PhoneField value={form.phone} onChange={updateField('phone')} />
   )
 
   return (
@@ -148,21 +134,7 @@ export function InquiryForm({
             </>
           )}
 
-          {/* Spam trap: hidden from people and screen readers, but bots that
-              fill in every field will fill this one too. */}
-          <div className="honeypot" aria-hidden="true">
-            <label>
-              Leave this empty
-              <input
-                type="text"
-                name="website"
-                tabIndex={-1}
-                autoComplete="off"
-                value={form.website}
-                onChange={updateField('website')}
-              />
-            </label>
-          </div>
+          <HoneypotField value={form.website} onChange={updateField('website')} />
 
           {compact ? null : (
             <label className="compact-field">

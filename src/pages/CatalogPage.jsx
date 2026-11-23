@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRightIcon, SearchIcon, WhatsAppIcon } from '../components/Icons.jsx'
 import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
+import { PAGE_META } from '../lib/pageMeta.js'
 import { trackContactClick } from '../lib/analytics.js'
 import { DEGREE_OPTIONS, degreeLabel, whatsappUrl } from '../lib/constants.js'
 import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
@@ -9,12 +10,7 @@ import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
 const PAGE_SIZE = 6
 
 export function CatalogPage() {
-  useDocumentMeta({
-    title: 'Project Catalog',
-    description:
-      'Browse B.Tech and M.Tech CSE project options by degree, domain, and keyword — with code, documentation, and viva support included.',
-    path: '/catalog',
-  })
+  useDocumentMeta(PAGE_META.catalog)
 
   const [degreeFilter, setDegreeFilter] = useState('all')
   const [domainFilter, setDomainFilter] = useState('all')
@@ -68,6 +64,8 @@ export function CatalogPage() {
         .from('projects')
         .select('id,title,degree_level,domain,abstract,tags')
         .eq('is_active', true)
+        // B.Tech first (most visitors), newest first within each degree.
+        .order('degree_level', { ascending: true })
         .order('created_at', { ascending: false })
 
       if (degreeFilter !== 'all') {

@@ -1,16 +1,32 @@
+import { lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { Layout } from './components/Layout.jsx'
 import { ProtectedRoute } from './components/ProtectedRoute.jsx'
-import { AdminInquiriesPage } from './pages/AdminInquiriesPage.jsx'
-import { AdminProjectsPage } from './pages/AdminProjectsPage.jsx'
-import { AuthPage } from './pages/AuthPage.jsx'
 import { CatalogPage } from './pages/CatalogPage.jsx'
 import { ContactPage } from './pages/ContactPage.jsx'
-import { DashboardPage } from './pages/DashboardPage.jsx'
 import { HomePage } from './pages/HomePage.jsx'
 import { InquirePage } from './pages/InquirePage.jsx'
 import { NotFoundPage } from './pages/NotFoundPage.jsx'
 import { ProjectPage } from './pages/ProjectPage.jsx'
+
+// Sign-in, the student dashboard and the admin pages are loaded only when
+// someone opens them, so visitors don't download that code.
+const AuthPage = lazy(() =>
+  import('./pages/AuthPage.jsx').then((module) => ({ default: module.AuthPage })),
+)
+const DashboardPage = lazy(() =>
+  import('./pages/DashboardPage.jsx').then((module) => ({ default: module.DashboardPage })),
+)
+const AdminProjectsPage = lazy(() =>
+  import('./pages/AdminProjectsPage.jsx').then((module) => ({
+    default: module.AdminProjectsPage,
+  })),
+)
+const AdminInquiriesPage = lazy(() =>
+  import('./pages/AdminInquiriesPage.jsx').then((module) => ({
+    default: module.AdminInquiriesPage,
+  })),
+)
 
 function App() {
   return (

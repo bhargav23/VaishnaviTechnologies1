@@ -1,7 +1,5 @@
 import { useEffect } from 'react'
-
-const SITE_NAME = 'Vaishnavi Technologies'
-const SITE_URL = 'https://vaishnavitech.in'
+import { SITE_URL, fullTitle as buildTitle } from '../lib/pageMeta.js'
 
 function setMetaTag(attribute, key, content) {
   let element = document.head.querySelector(`meta[${attribute}="${key}"]`)
@@ -35,7 +33,7 @@ function setCanonical(path) {
  */
 export function useDocumentMeta({ title, description, path = '', noindex = false }) {
   useEffect(() => {
-    const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME
+    const fullTitle = buildTitle(title)
     document.title = fullTitle
 
     if (description) {

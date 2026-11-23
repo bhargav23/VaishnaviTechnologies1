@@ -29,12 +29,16 @@ create table if not exists public.inquiries (
   project_id uuid references public.projects(id) on delete restrict,
   name text not null,
   email text not null,
-  degree text not null check (degree in ('btech', 'mtech', 'phd')),
+  -- Required for inquiries; optional for Contact page messages.
+  degree text check (degree in ('btech', 'mtech', 'phd')),
   message text not null,
   -- Optional phone / WhatsApp number, normalised to digits with an optional "+".
   phone text,
   -- One-way hash of the sender's IP, used only for rate limiting.
   client_hash text,
+  -- 'inquiry' (inquiry forms) or 'contact' (Contact page), with its subject.
+  source text not null default 'inquiry',
+  subject text,
   status text not null default 'pending' check (status in ('pending', 'active', 'completed')),
   created_at timestamptz not null default timezone('utc', now())
 );
@@ -279,6 +283,24 @@ drop trigger if exists limit_inquiry_submissions on public.inquiries;
 create trigger limit_inquiry_submissions
 before insert on public.inquiries
 for each row execute procedure public.limit_inquiry_submissions();
+
+-- Contact page messages. Same SQL as
+-- supabase/migrations/20261124_contact_form_messages.sql. Safe to re-run.
+alter table public.inquiries add column if not exists source text not null default 'inquiry';
+alter table public.inquiries add column if not exists subject text;
+alter table public.inquiries alter column degree drop not null;
+
+alter table public.inquiries drop constraint if exists inquiries_source_check;
+alter table public.inquiries add constraint inquiries_source_check
+  check (source in ('inquiry', 'contact'));
+
+alter table public.inquiries drop constraint if exists inquiries_subject_length;
+alter table public.inquiries add constraint inquiries_subject_length
+  check (subject is null or char_length(subject) <= 150);
+
+alter table public.inquiries drop constraint if exists inquiries_degree_required;
+alter table public.inquiries add constraint inquiries_degree_required
+  check (source = 'contact' or degree is not null);
 
 create or replace function public.handle_new_user()
 returns trigger

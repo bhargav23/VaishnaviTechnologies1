@@ -17,10 +17,50 @@
   status = 200
   force = true
 
+# Public pages get their own copy of index.html with the right title and
+# link-preview details (written by scripts/route-pages.mjs at build time).
+[[redirects]]
+  from = "/catalog"
+  to = "/route-pages/catalog.html"
+  status = 200
+
+[[redirects]]
+  from = "/inquire"
+  to = "/route-pages/inquire.html"
+  status = 200
+
+[[redirects]]
+  from = "/contact"
+  to = "/route-pages/contact.html"
+  status = 200
+
+# The rest of the app's routes. Keep in sync with src/App.jsx.
+[[redirects]]
+  from = "/auth"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin/*"
+  to = "/index.html"
+  status = 200
+
+# Anything else is a page that doesn't exist: show the app's "Page not
+# found" screen with a real 404 status, so Google doesn't index it.
 [[redirects]]
   from = "/*"
   to = "/index.html"
-  status = 200
+  status = 404
 
 # Security headers for every static page and asset. The project-preview
 # function sets the same headers on its own responses; keep the two in sync.

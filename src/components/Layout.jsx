@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
 import { trackContactClick } from '../lib/analytics.js'
@@ -137,7 +137,9 @@ export function Layout() {
             </button>
           </div>
         ) : null}
-        <Outlet />
+        <Suspense fallback={<p className="muted">Loading...</p>}>
+          <Outlet />
+        </Suspense>
       </main>
 
       <footer className="site-footer">

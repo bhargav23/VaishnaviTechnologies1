@@ -29,15 +29,21 @@ function statusLabel(status) {
   return status.charAt(0).toUpperCase() + status.slice(1)
 }
 
+function isContactMessage(inquiry) {
+  return inquiry.source === 'contact'
+}
+
 // A mailto link that opens a reply to the student with their message quoted.
 function replyHref(inquiry) {
   const firstName = (inquiry.name || '').trim().split(/\s+/)[0] || 'there'
   const about = inquiry.projects?.title ? ` about "${inquiry.projects.title}"` : ''
-  const subject = `Re: Your ${degreeLabel(inquiry.degree)} mentorship inquiry — Vaishnavi Technologies`
+  const subject = isContactMessage(inquiry)
+    ? `Re: ${inquiry.subject || 'Your message'} — Vaishnavi Technologies`
+    : `Re: Your ${degreeLabel(inquiry.degree)} mentorship inquiry — Vaishnavi Technologies`
   const body = [
     `Hi ${firstName},`,
     '',
-    `Thank you for your inquiry${about}.`,
+    isContactMessage(inquiry) ? 'Thank you for your message.' : `Thank you for your inquiry${about}.`,
     '',
     '',
     '',
@@ -83,7 +89,9 @@ function displayPhone(phone) {
 function whatsappReplyHref(inquiry) {
   const firstName = (inquiry.name || '').trim().split(/\s+/)[0] || 'there'
   const about = inquiry.projects?.title ? ` about "${inquiry.projects.title}"` : ''
-  const text = `Hi ${firstName}, this is Vaishnavi Technologies. Thank you for your ${degreeLabel(inquiry.degree)} inquiry${about}.`
+  const text = isContactMessage(inquiry)
+    ? `Hi ${firstName}, this is Vaishnavi Technologies. Thank you for your message.`
+    : `Hi ${firstName}, this is Vaishnavi Technologies. Thank you for your ${degreeLabel(inquiry.degree)} inquiry${about}.`
   return `https://wa.me/${internationalDigits(inquiry.phone)}?text=${encodeURIComponent(text)}`
 }
 
@@ -111,13 +119,14 @@ export function AdminInquiriesPage() {
   const [confirmDeleteId, setConfirmDeleteId] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [degreeFilter, setDegreeFilter] = useState('all')
+  const [typeFilter, setTypeFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
 
   const fetchInquiries = () =>
     supabase
       .from('inquiries')
       .select(
-        'id,name,email,phone,degree,message,status,created_at,projects(id,title,domain)',
+        'id,name,email,phone,degree,source,subject,message,status,created_at,projects(id,title,domain)',
       )
       .order('created_at', { ascending: false })
 
@@ -170,11 +179,15 @@ export function AdminInquiriesPage() {
       if (degreeFilter !== 'all' && inquiry.degree !== degreeFilter) {
         return false
       }
+      if (typeFilter !== 'all' && (inquiry.source ?? 'inquiry') !== typeFilter) {
+        return false
+      }
       if (term) {
         const haystack = [
           inquiry.name,
           inquiry.email,
           inquiry.phone,
+          inquiry.subject,
           inquiry.projects?.title,
         ]
           .filter(Boolean)
@@ -186,7 +199,7 @@ export function AdminInquiriesPage() {
       }
       return true
     })
-  }, [inquiries, statusFilter, degreeFilter, searchTerm])
+  }, [inquiries, statusFilter, degreeFilter, typeFilter, searchTerm])
 
   const updateStatus = async (inquiryId, status) => {
     if (!supabase) {
@@ -244,8 +257,8 @@ export function AdminInquiriesPage() {
         <p className="eyebrow">Admin Panel</p>
         <h1>Student inquiries</h1>
         <p className="page-lead">
-          Review incoming leads, check project interest, and update request
-          status for student visibility.
+          Mentorship requests and Contact page messages. Reply, update the
+          status, or delete spam.
         </p>
       </section>
       <AdminTabs />
@@ -279,6 +292,14 @@ export function AdminInquiriesPage() {
       ) : null}
 
       <div className="form-wrap filter-panel">
+        <label className="compact-field">
+          <span>Type</span>
+          <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
+            <option value="all">All</option>
+            <option value="inquiry">Inquiry form</option>
+            <option value="contact">Contact page</option>
+          </select>
+        </label>
         <label className="compact-field">
           <span>Status</span>
           <select
@@ -336,7 +357,7 @@ export function AdminInquiriesPage() {
             <tr>
               <th scope="col">Submitted</th>
               <th scope="col">Student</th>
-              <th scope="col">Project</th>
+              <th scope="col">Project / subject</th>
               <th scope="col">Requirement</th>
               <th scope="col">Status</th>
               <th scope="col">Actions</th>
@@ -362,10 +383,17 @@ export function AdminInquiriesPage() {
                       </a>
                     </div>
                   ) : null}
-                  <div className="muted">{degreeLabel(inquiry.degree)}</div>
+                  {inquiry.degree ? (
+                    <div className="muted">{degreeLabel(inquiry.degree)}</div>
+                  ) : null}
                 </td>
                 <td>
-                  {inquiry.projects?.id ? (
+                  {isContactMessage(inquiry) ? (
+                    <>
+                      <span className="pill pill-contact">Contact page</span>
+                      {inquiry.subject ? <div><strong>{inquiry.subject}</strong></div> : null}
+                    </>
+                  ) : inquiry.projects?.id ? (
                     <Link className="text-link" to={`/project/${inquiry.projects.id}`}>
                       {inquiry.projects.title}
                     </Link>
