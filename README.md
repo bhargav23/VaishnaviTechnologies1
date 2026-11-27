@@ -34,6 +34,7 @@ React + Vite frontend deployed on Netlify, backed by Supabase for auth, data, an
 When a change needs a database update, the SQL lives in `supabase/migrations/` and is also folded into `supabase/schema.sql`. Run the migration in the Supabase SQL editor **before** the frontend change is deployed.
 
 - `20261119_phd_and_own_topic_inquiries.sql`: lets PhD scholars sign up and inquire, and lets anyone inquire about their own topic instead of a catalog project.
+- `20261127_inquiry_heard_from.sql`: stores the answer to "How did you hear about us?" on inquiries.
 
 One-off data cleanups live in `supabase/data/` (for example `20261119_normalize_project_domains.sql`, which folds the catalog's domain names into a short list). Review them before running.
 

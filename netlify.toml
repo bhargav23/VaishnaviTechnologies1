@@ -23,11 +23,36 @@
   status = 200
   force = true
 
-# Public pages get their own copy of index.html with the right title and
-# link-preview details (written by scripts/route-pages.mjs at build time).
+# Public pages get their own prerendered copy of index.html: the page's
+# content plus its title and link-preview details (written by
+# scripts/route-pages.mjs at build time). Keep in sync with PRERENDERED_PAGES
+# in src/lib/pageMeta.js. The home page rule needs force = true because
+# dist/index.html exists; index.html itself stays the empty app shell that
+# the signed-in pages, 404s and project pages use.
+[[redirects]]
+  from = "/"
+  to = "/route-pages/home.html"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/catalog"
   to = "/route-pages/catalog.html"
+  status = 200
+
+[[redirects]]
+  from = "/btech-cse-projects"
+  to = "/route-pages/btech.html"
+  status = 200
+
+[[redirects]]
+  from = "/mtech-cse-projects"
+  to = "/route-pages/mtech.html"
+  status = 200
+
+[[redirects]]
+  from = "/phd-research-guidance"
+  to = "/route-pages/phd.html"
   status = 200
 
 [[redirects]]

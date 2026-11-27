@@ -6,8 +6,10 @@ import { CatalogPage } from './pages/CatalogPage.jsx'
 import { ContactPage } from './pages/ContactPage.jsx'
 import { HomePage } from './pages/HomePage.jsx'
 import { InquirePage } from './pages/InquirePage.jsx'
+import { LandingPage } from './pages/LandingPage.jsx'
 import { NotFoundPage } from './pages/NotFoundPage.jsx'
 import { ProjectPage } from './pages/ProjectPage.jsx'
+import { LANDING_PAGE_KEYS, PAGE_META } from './lib/pageMeta.js'
 
 // Sign-in, the student dashboard and the admin pages are loaded only when
 // someone opens them, so visitors don't download that code.
@@ -37,6 +39,15 @@ function App() {
         <Route path="/project/:projectId" element={<ProjectPage />} />
         <Route path="/inquire" element={<InquirePage />} />
         <Route path="/contact" element={<ContactPage />} />
+        {LANDING_PAGE_KEYS.map((key) => (
+          // The key makes React start fresh (form degree, project list) when
+          // moving between landing pages.
+          <Route
+            key={key}
+            path={PAGE_META[key].path}
+            element={<LandingPage key={key} pageKey={key} />}
+          />
+        ))}
         <Route path="/auth" element={<AuthPage />} />
         <Route
           path="/dashboard"

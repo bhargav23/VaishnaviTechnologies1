@@ -302,6 +302,14 @@ alter table public.inquiries drop constraint if exists inquiries_degree_required
 alter table public.inquiries add constraint inquiries_degree_required
   check (source = 'contact' or degree is not null);
 
+-- "How did you hear about us?". Same SQL as
+-- supabase/migrations/20261127_inquiry_heard_from.sql. Safe to re-run.
+alter table public.inquiries add column if not exists heard_from text;
+
+alter table public.inquiries drop constraint if exists inquiries_heard_from_length;
+alter table public.inquiries add constraint inquiries_heard_from_length
+  check (heard_from is null or char_length(heard_from) between 1 and 40);
+
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql

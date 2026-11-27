@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRightIcon, SearchIcon, WhatsAppIcon } from '../components/Icons.jsx'
 import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
+import { useInitialData } from '../lib/initialData.js'
 import { PAGE_META } from '../lib/pageMeta.js'
 import { trackContactClick } from '../lib/analytics.js'
 import { DEGREE_OPTIONS, degreeLabel, whatsappUrl } from '../lib/constants.js'
@@ -9,17 +10,29 @@ import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
 
 const PAGE_SIZE = 6
 
+function uniqueDomains(rows) {
+  return Array.from(new Set(rows.map((row) => row.domain).filter(Boolean))).sort((a, b) =>
+    a.localeCompare(b),
+  )
+}
+
 export function CatalogPage() {
   useDocumentMeta(PAGE_META.catalog)
 
+  // The prerendered page carries the catalog as it was at build time, so it
+  // shows (and search engines see) projects straight away; the effects below
+  // then load the live catalog.
+  const initialProjects = useInitialData('catalog')
   const [degreeFilter, setDegreeFilter] = useState('all')
   const [domainFilter, setDomainFilter] = useState('all')
-  const [domainOptions, setDomainOptions] = useState([])
+  const [domainOptions, setDomainOptions] = useState(() => uniqueDomains(initialProjects ?? []))
   const [searchTerm, setSearchTerm] = useState('')
-  const [projects, setProjects] = useState([])
+  const [projects, setProjects] = useState(initialProjects ?? [])
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!initialProjects)
   const [currentPage, setCurrentPage] = useState(1)
+  // Refresh the build-time list quietly instead of flashing "Loading...".
+  const quietFirstLoad = useRef(Boolean(initialProjects))
 
   useEffect(() => {
     let alive = true
@@ -36,11 +49,7 @@ export function CatalogPage() {
         return
       }
 
-      const uniqueDomains = Array.from(
-        new Set(data.map((row) => row.domain).filter(Boolean)),
-      ).sort((a, b) => a.localeCompare(b))
-
-      setDomainOptions(uniqueDomains)
+      setDomainOptions(uniqueDomains(data))
     }
 
     loadDomains()
@@ -58,7 +67,11 @@ export function CatalogPage() {
         return
       }
 
-      setLoading(true)
+      if (quietFirstLoad.current) {
+        quietFirstLoad.current = false
+      } else {
+        setLoading(true)
+      }
       setError('')
       let query = supabase
         .from('projects')
@@ -67,6 +80,7 @@ export function CatalogPage() {
         // B.Tech first (most visitors), newest first within each degree.
         .order('degree_level', { ascending: true })
         .order('created_at', { ascending: false })
+        .order('title')
 
       if (degreeFilter !== 'all') {
         query = query.eq('degree_level', degreeFilter)

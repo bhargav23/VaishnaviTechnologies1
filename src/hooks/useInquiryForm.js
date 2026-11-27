@@ -32,6 +32,7 @@ export function useInquiryForm({
     phone: '',
     degree: STUDENT_DEGREE_OPTIONS.includes(initialDegree) ? initialDegree : 'btech',
     message: '',
+    heardFrom: '',
     website: '', // honeypot: hidden from people, filled in by bots
   }))
   const startedAt = useRef(0)
@@ -116,7 +117,7 @@ export function useInquiryForm({
     setSubmitting(true)
 
     try {
-      const { error: insertError } = await supabase.from('inquiries').insert({
+      const inquiry = {
         student_id: user?.id ?? null,
         project_id: projectId || null,
         name: form.name.trim(),
@@ -125,7 +126,18 @@ export function useInquiryForm({
         degree: form.degree,
         message: form.message.trim(),
         status: 'pending',
-      })
+      }
+      if (form.heardFrom) {
+        inquiry.heard_from = form.heardFrom
+      }
+      let { error: insertError } = await supabase.from('inquiries').insert(inquiry)
+      // PGRST204: the database doesn't have the heard_from column yet (see
+      // supabase/migrations/20261127_inquiry_heard_from.sql). Save the
+      // inquiry without it rather than losing the lead.
+      if (insertError?.code === 'PGRST204' && 'heard_from' in inquiry) {
+        delete inquiry.heard_from
+        ;({ error: insertError } = await supabase.from('inquiries').insert(inquiry))
+      }
 
       if (insertError) {
         setError(friendlyInsertError(insertError))
@@ -135,6 +147,7 @@ export function useInquiryForm({
       trackLead({
         degree: form.degree,
         request_type: projectId ? 'catalog_project' : 'own_topic',
+        heard_from: form.heardFrom || 'not_given',
       })
       setSuccess(true)
       setForm((current) => ({

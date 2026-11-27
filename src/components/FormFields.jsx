@@ -1,3 +1,5 @@
+import { HEARD_FROM_OPTIONS } from '../lib/constants.js'
+
 /** Optional phone / WhatsApp number field shared by the site's forms. */
 export function PhoneField({ value, onChange }) {
   return (
@@ -39,5 +41,24 @@ export function HoneypotField({ value, onChange }) {
         />
       </label>
     </div>
+  )
+}
+
+/** Optional "How did you hear about us?" question on the inquiry forms. */
+export function HeardFromField({ value, onChange }) {
+  return (
+    <label className="compact-field">
+      <span>
+        How did you hear about us? <span className="optional">(optional)</span>
+      </span>
+      <select value={value} onChange={onChange}>
+        <option value="">Choose one</option>
+        {HEARD_FROM_OPTIONS.map(([key, label]) => (
+          <option key={key} value={key}>
+            {label}
+          </option>
+        ))}
+      </select>
+    </label>
   )
 }

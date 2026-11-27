@@ -1,6 +1,9 @@
 const staticPaths = [
   ['', 'weekly', '1.0'],
   ['/catalog', 'daily', '0.9'],
+  ['/btech-cse-projects', 'weekly', '0.9'],
+  ['/mtech-cse-projects', 'weekly', '0.9'],
+  ['/phd-research-guidance', 'monthly', '0.8'],
   ['/inquire', 'monthly', '0.6'],
   ['/contact', 'monthly', '0.5'],
 ]

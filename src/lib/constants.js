@@ -23,6 +23,24 @@ export function isUuid(value) {
 
 export const INQUIRY_STATUS = ['pending', 'active', 'completed']
 
+// "How did you hear about us?" on the inquiry form. The value is stored in
+// inquiries.heard_from; labels can change, values should not (old inquiries
+// keep their value). Shown as a summary on the admin inquiries page.
+export const HEARD_FROM_OPTIONS = [
+  ['google_search', 'Google search'],
+  ['google_maps', 'Google Maps'],
+  ['instagram', 'Instagram'],
+  ['youtube', 'YouTube'],
+  ['whatsapp', 'WhatsApp'],
+  ['friend', 'Friend or senior'],
+  ['college', 'College or workshop'],
+  ['other', 'Other'],
+]
+
+export function heardFromLabel(value) {
+  return HEARD_FROM_OPTIONS.find(([key]) => key === value)?.[1] ?? value
+}
+
 export const CONTACT = {
   email: 'info@vaishnavitech.in',
   phoneDisplay: '+91 99895 72748',
