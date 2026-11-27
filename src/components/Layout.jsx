@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
 import { trackContactClick } from '../lib/analytics.js'
 import { BUSINESS, CONTACT, whatsappUrl } from '../lib/constants.js'
+import { PAGE_META } from '../lib/pageMeta.js'
 import { isSupabaseConfigured } from '../lib/supabase.js'
 import { CloseIcon, MenuIcon, PhoneIcon, WhatsAppIcon } from './Icons.jsx'
 
@@ -184,6 +185,21 @@ export function Layout() {
                     <Link to="/auth">Sign in</Link>
                   </li>
                 )}
+              </ul>
+            </div>
+
+            <div className="footer-col">
+              <h2>Services</h2>
+              <ul className="footer-links">
+                <li>
+                  <Link to={PAGE_META.btech.path}>B.Tech CSE projects</Link>
+                </li>
+                <li>
+                  <Link to={PAGE_META.mtech.path}>M.Tech CSE projects</Link>
+                </li>
+                <li>
+                  <Link to={PAGE_META.phd.path}>PhD research guidance</Link>
+                </li>
               </ul>
             </div>
 

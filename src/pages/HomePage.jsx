@@ -15,6 +15,7 @@ import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
 import { PAGE_META } from '../lib/pageMeta.js'
 import { trackContactClick } from '../lib/analytics.js'
 import { BUSINESS, CONTACT, whatsappUrl } from '../lib/constants.js'
+import { addOns, projectTiers, researchStages, services } from '../lib/siteContent.js'
 
 const heroHighlights = [
   'Source code, report & PPT',
@@ -33,8 +34,8 @@ const tracks = [
         From <strong>₹1,500</strong>
       </>
     ),
-    linkText: 'Browse projects',
-    to: '/catalog',
+    linkText: 'B.Tech projects',
+    to: PAGE_META.btech.path,
   },
   {
     label: 'M.Tech CSE',
@@ -45,16 +46,16 @@ const tracks = [
         From <strong>₹10,000</strong>
       </>
     ),
-    linkText: 'Start an inquiry',
-    to: '/inquire?degree=mtech',
+    linkText: 'M.Tech projects',
+    to: PAGE_META.mtech.path,
   },
   {
     label: 'PhD scholars',
     title: 'Research guidance',
     text: 'Problem selection, literature review, experiment design, publication mentoring, and thesis formatting.',
     price: <>Quote based on scope</>,
-    linkText: 'Request guidance',
-    to: '/inquire?degree=phd',
+    linkText: 'Research guidance',
+    to: PAGE_META.phd.path,
   },
 ]
 
@@ -71,66 +72,6 @@ const steps = [
   ['Build with checkpoints', 'Working code, reviewed with you along the way.'],
   ['Report & PPT', 'Documentation prepared alongside the build.'],
   ['Viva preparation', 'Practice explaining and defending your work.'],
-]
-
-const services = [
-  {
-    label: 'Catalog projects',
-    title: 'Start from a tested project',
-    description:
-      'Pick a project from our catalog and customise it to your requirement, with source code, report, PPT, and viva preparation for mini and major projects.',
-  },
-  {
-    label: 'Custom-built projects',
-    title: 'Built around your requirement',
-    description:
-      'Custom domain selection, unique feature combinations, and an implementation you can explain and defend in your final-year evaluation.',
-  },
-  {
-    label: 'Guidance-only mentorship',
-    title: 'Coach the student to build it',
-    description:
-      'Idea validation, documentation support, review checkpoints, and mentoring while the student writes the code.',
-  },
-]
-
-const researchStages = [
-  'Problem selection',
-  'Literature review',
-  'Experiment design',
-  'Paper mentoring',
-  'Journal selection',
-  'Thesis preparation',
-]
-
-const projectTiers = [
-  {
-    tier: 'Basic',
-    price: '₹1,500 – ₹3,000',
-    scope: 'Simple CRUD apps, basic ML models, and standard documentation.',
-    bestFor: 'B.Tech mini projects',
-  },
-  {
-    tier: 'Standard',
-    price: '₹4,000 – ₹8,000',
-    scope: 'Real datasets, functional UI, deployment-ready build, PPT and report.',
-    bestFor: 'B.Tech major projects',
-  },
-  {
-    tier: 'Premium',
-    price: '₹10,000 – ₹30,000+',
-    scope: 'Research-oriented systems, paper mentoring, similarity check, and viva prep.',
-    bestFor: 'M.Tech thesis projects',
-  },
-]
-
-const addOns = [
-  ['Similarity check report', '₹300 – ₹600'],
-  ['Video demo / code walkthrough for viva', '₹500 – ₹1,000'],
-  ['1-on-1 viva prep / mock defense session', '₹500 – ₹1,500'],
-  ['Research paper mentoring (per paper)', '₹3,000 – ₹8,000'],
-  ['Journal selection & submission guidance', '₹5,000 – ₹15,000'],
-  ['Rush delivery (under 5 days)', '+20% of base price'],
 ]
 
 const faqs = [

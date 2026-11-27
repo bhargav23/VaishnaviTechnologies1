@@ -36,4 +36,30 @@ export const PAGE_META = {
     description:
       'Get in touch with Vaishnavi Technologies for questions about pricing, process, or general B.Tech, M.Tech and PhD project mentorship enquiries.',
   },
+  // Landing pages for what students search for (see src/pages/LandingPage.jsx).
+  btech: {
+    path: '/btech-cse-projects',
+    title: 'B.Tech CSE & IT Final Year Projects in Kakinada',
+    description:
+      'Mini and major B.Tech CSE and IT final year projects in Kakinada, with working source code, project report, PPT and viva preparation. From ₹1,500.',
+  },
+  mtech: {
+    path: '/mtech-cse-projects',
+    title: 'M.Tech CSE Projects & Thesis Guidance in Kakinada',
+    description:
+      'Thesis-level M.Tech CSE projects in Kakinada with research paper mentoring, similarity check, thesis documentation, PPT and viva preparation. From ₹10,000.',
+  },
+  phd: {
+    path: '/phd-research-guidance',
+    title: 'PhD Research Guidance for CSE Scholars in Kakinada',
+    description:
+      'Research guidance for computer science PhD scholars: problem selection, literature review, experiment design, paper mentoring, journal selection and thesis preparation.',
+  },
 }
+
+// Landing pages, in display order (content in src/pages/LandingPage.jsx).
+export const LANDING_PAGE_KEYS = ['btech', 'mtech', 'phd']
+
+// Public pages that scripts/route-pages.mjs prerenders, in sitemap order.
+// Each needs a rewrite in netlify.toml and an entry in the sitemap.
+export const PRERENDERED_PAGES = ['home', 'catalog', 'btech', 'mtech', 'phd', 'inquire', 'contact']

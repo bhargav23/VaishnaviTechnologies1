@@ -1,7 +1,7 @@
 import { useId } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
-import { HoneypotField, PhoneField } from './FormFields.jsx'
+import { HeardFromField, HoneypotField, PhoneField } from './FormFields.jsx'
 import { OWN_TOPIC, useInquiryForm } from '../hooks/useInquiryForm.js'
 import { trackContactClick } from '../lib/analytics.js'
 import {
@@ -133,6 +133,8 @@ export function InquiryForm({
               </fieldset>
             </>
           )}
+
+          <HeardFromField value={form.heardFrom} onChange={updateField('heardFrom')} />
 
           <HoneypotField value={form.website} onChange={updateField('website')} />
 

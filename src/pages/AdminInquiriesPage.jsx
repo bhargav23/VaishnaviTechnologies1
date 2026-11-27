@@ -4,9 +4,11 @@ import { AdminTabs } from '../components/AdminTabs.jsx'
 import { MailIcon, PhoneIcon, WhatsAppIcon } from '../components/Icons.jsx'
 import {
   CONTACT,
+  HEARD_FROM_OPTIONS,
   INQUIRY_STATUS,
   STUDENT_DEGREE_OPTIONS,
   degreeLabel,
+  heardFromLabel,
 } from '../lib/constants.js'
 import { useDocumentMeta } from '../hooks/useDocumentMeta.js'
 import { isSupabaseConfigured, supabase } from '../lib/supabase.js'
@@ -122,13 +124,21 @@ export function AdminInquiriesPage() {
   const [typeFilter, setTypeFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
 
-  const fetchInquiries = () =>
-    supabase
+  const fetchInquiries = async () => {
+    const columns =
+      'id,name,email,phone,degree,source,subject,message,status,created_at,projects(id,title,domain)'
+    const result = await supabase
       .from('inquiries')
-      .select(
-        'id,name,email,phone,degree,source,subject,message,status,created_at,projects(id,title,domain)',
-      )
+      .select(`${columns},heard_from`)
       .order('created_at', { ascending: false })
+    // 42703: the heard_from column doesn't exist yet (run
+    // supabase/migrations/20261127_inquiry_heard_from.sql). Show the
+    // inquiries without it.
+    if (result.error?.code === '42703') {
+      return supabase.from('inquiries').select(columns).order('created_at', { ascending: false })
+    }
+    return result
+  }
 
   const applyInquiries = ({ data, error: queryError }) => {
     if (queryError) {
@@ -169,6 +179,20 @@ export function AdminInquiriesPage() {
   const completedCount = inquiries.filter(
     (item) => item.status === 'completed',
   ).length
+
+  // How students found us, most common first, from the inquiry form answers.
+  const heardFromCounts = useMemo(() => {
+    const counts = new Map()
+    inquiries.forEach((inquiry) => {
+      if (inquiry.heard_from) {
+        counts.set(inquiry.heard_from, (counts.get(inquiry.heard_from) ?? 0) + 1)
+      }
+    })
+    const order = HEARD_FROM_OPTIONS.map(([key]) => key)
+    return [...counts.entries()].sort(
+      (a, b) => b[1] - a[1] || order.indexOf(a[0]) - order.indexOf(b[0]),
+    )
+  }, [inquiries])
 
   const filteredInquiries = useMemo(() => {
     const term = searchTerm.trim().toLowerCase()
@@ -280,6 +304,18 @@ export function AdminInquiriesPage() {
           <span>Completed</span>
         </article>
       </section>
+      {heardFromCounts.length ? (
+        <section className="heard-from-summary" aria-label="How students heard about us">
+          <strong>How students heard about us</strong>
+          <ul>
+            {heardFromCounts.map(([key, count]) => (
+              <li className="soft-pill" key={key}>
+                {heardFromLabel(key)}: {count}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       {error ? (
         <div className="error-box" role="alert">
           {error}
@@ -385,6 +421,9 @@ export function AdminInquiriesPage() {
                   ) : null}
                   {inquiry.degree ? (
                     <div className="muted">{degreeLabel(inquiry.degree)}</div>
+                  ) : null}
+                  {inquiry.heard_from ? (
+                    <div className="muted">Heard via {heardFromLabel(inquiry.heard_from)}</div>
                   ) : null}
                 </td>
                 <td>
